@@ -1,4 +1,5 @@
 import tmi from 'tmi.js';
+import chalk from 'chalk';
 
 //================================//
 export class TwitchIRCSocket {
@@ -22,10 +23,10 @@ export class TwitchIRCSocket {
 
         this.m_twitchClient.connect()
             .then(() => {
-                console.log('Connected to Twitch');
+                console.log(chalk.green('Connected to Twitch'));
             })
             .catch((error) => {
-                console.error('Error connecting to Twitch: ', error);
+                console.error(chalk.red('Error connecting to Twitch: ', error));
             });
     }
 

@@ -1,6 +1,6 @@
 import { SingleSocketServer } from "./SingleSocketServer";
 import { TwitchIRCSocket } from "./TwitchIRCSocket";
-import { Socket } from 'socket.io';
+import chalk from "chalk";
 
 //================================//
 export class MyTwitchChat extends TwitchIRCSocket {
@@ -46,7 +46,7 @@ export class MyTwitchChat extends TwitchIRCSocket {
         try {
             this.getTwitchClient().say(_channel, _message);
         } catch (error) {
-            console.error('Error sending message: ', error);
+            console.error(chalk.red('Error sending message: ', error));
         }
     }
 }

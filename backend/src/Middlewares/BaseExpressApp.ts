@@ -1,5 +1,6 @@
 import express from 'express';
 import http from 'http';
+import chalk from 'chalk';
 
 //================================//
 export class BaseExpressApp {
@@ -18,7 +19,7 @@ export class BaseExpressApp {
     //================================//
     private initializeServer( _PORT: string): void {
         this.server.listen(_PORT, () => {
-            console.log('Server running on port' + _PORT);
+            console.log(chalk.green('Server running on port' + _PORT));
         });
     }
 }

@@ -1,5 +1,6 @@
 import { Socket } from 'socket.io';
 import { SingleSocketServer } from './SingleSocketServer';
+import chalk from 'chalk';
 
 //================================//
 export class MyServer extends SingleSocketServer{
@@ -22,6 +23,6 @@ export class MyServer extends SingleSocketServer{
     protected onClientConnection(socket: Socket): void {
         super.onClientConnection(socket);
         
-        console.log('Client connected:', socket.id);
+        console.log(chalk.yellow('Client connected:', socket.id));
     }
 }
