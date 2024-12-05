@@ -1,5 +1,5 @@
-import { Socket } from 'socket.io';
-import { SingleSocketServer } from './SingleSocketServer';
+import { Socket } from '../../node_modules/socket.io/dist/index.js';
+import { SingleSocketServer } from './SingleSocketServer.js';
 import chalk from 'chalk';
 
 //================================//

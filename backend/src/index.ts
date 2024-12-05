@@ -1,7 +1,8 @@
 import 'dotenv/config';
-import { BaseExpressApp } from './Middlewares/BaseExpressApp';
-import { MyServer } from './Services/MyServer';
-import { MyTwitchChat } from './Services/MyTwitchChat';
+import { BaseExpressApp } from './Middlewares/BaseExpressApp.js';
+import { MyServer } from './Services/MyServer.js';
+import { MyTwitchChat } from './Services/MyTwitchChat.js';
+import { MyTwitchDBEndpoint } from './Services/MyTwitchDBEndpoint.js';
 
 //------------Members-------------//
 const PORT = process.env.PORT || '5000';
@@ -11,6 +12,11 @@ const TwitchClient: MyTwitchChat = new MyTwitchChat(process.env.TWITCH_USERNAME!
 
 function Init(): void {
     TwitchClient.addListenerServer(SocketServer);
+    MyTwitchDBEndpoint.Init(process.env.DB_USER!, process.env.DB_HOST!, process.env.DB_DATABASE!, process.env.DB_PASSWORD!, parseInt(process.env.DB_PORT!));
+
+    MyTwitchDBEndpoint.GetFullUsersInfo().then((users) => {
+        console.log(users);
+    });
 }
 
 Init();

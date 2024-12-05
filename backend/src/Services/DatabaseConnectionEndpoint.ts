@@ -1,8 +1,9 @@
-import { Pool } from "pg";
+import pkg from 'pg';
+const { Pool } = pkg;
 
 //================================//
 export class DatabaseConnectionEndpoint {
-    private m_pool: Pool;
+    private m_pool: pkg.Pool;
 
     //================================//
     constructor(_user: string, _host: string, _database: string, _password: string, _port: number) {

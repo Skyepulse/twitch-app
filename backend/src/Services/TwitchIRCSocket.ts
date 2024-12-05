@@ -25,7 +25,7 @@ export class TwitchIRCSocket {
             .then(() => {
                 console.log(chalk.green('Connected to Twitch'));
             })
-            .catch((error) => {
+            .catch((error: any) => {
                 console.error(chalk.red('Error connecting to Twitch: ', error));
             });
     }

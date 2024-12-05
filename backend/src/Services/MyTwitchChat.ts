@@ -1,5 +1,5 @@
-import { SingleSocketServer } from "./SingleSocketServer";
-import { TwitchIRCSocket } from "./TwitchIRCSocket";
+import { SingleSocketServer } from "./SingleSocketServer.js";
+import { TwitchIRCSocket } from "./TwitchIRCSocket.js";
 import chalk from "chalk";
 
 //================================//
@@ -10,8 +10,8 @@ export class MyTwitchChat extends TwitchIRCSocket {
     constructor(_username: string, _password: string, _channels: string[], _debug: boolean = false) {
         super(_username, _password, _channels, _debug);
 
-        this.getTwitchClient().on('message', (channel, tags, message, self) => {
-            this.onReceivedTwitchMessage(channel, tags, message, self);
+        this.getTwitchClient().on('message', (_channel: string, _tags: any, _message: string, _self: boolean) => {
+            this.onReceivedTwitchMessage(_channel, _tags, _message, _self);
         });
     }
 
@@ -45,7 +45,7 @@ export class MyTwitchChat extends TwitchIRCSocket {
     public SendChatMessage(_channel: string, _message: string): void {
         try {
             this.getTwitchClient().say(_channel, _message);
-        } catch (error) {
+        } catch (error: any) {
             console.error(chalk.red('Error sending message: ', error));
         }
     }
