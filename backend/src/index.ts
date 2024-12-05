@@ -12,7 +12,7 @@ const TwitchClient: MyTwitchChat = new MyTwitchChat(process.env.TWITCH_USERNAME!
 
 function Init(): void {
     TwitchClient.addListenerServer(SocketServer);
-    MyTwitchDBEndpoint.Init(process.env.DB_USER!, process.env.DB_HOST!, process.env.DB_DATABASE!, process.env.DB_PASSWORD!, parseInt(process.env.DB_PORT!));
+    MyTwitchDBEndpoint.Init(process.env.DB_USER!, process.env.DB_HOST!, process.env.DB_NAME!, process.env.DB_PASSWORD!, parseInt(process.env.DB_PORT!));
 
     MyTwitchDBEndpoint.GetFullUsersInfo().then((users) => {
         console.log(users);
