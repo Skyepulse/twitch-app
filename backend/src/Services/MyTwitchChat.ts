@@ -7,8 +7,8 @@ export class MyTwitchChat extends TwitchIRCSocket {
     private ListeningSocketServers  : SingleSocketServer[] = [];
 
     //================================//
-    constructor(_username: string, _password: string, _channels: string[], _debug: boolean = false) {
-        super(_username, _password, _channels, _debug);
+    constructor(_username: string, _channels: string[], _debug: boolean = false) {
+        super(_username, _channels, _debug);
 
         this.getTwitchClient().on('message', (_channel: string, _tags: any, _message: string, _self: boolean) => {
             this.onReceivedTwitchMessage(_channel, _tags, _message, _self);

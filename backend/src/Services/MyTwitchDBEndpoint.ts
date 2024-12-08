@@ -8,6 +8,11 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
 
     //================================//
     private constructor(user: string, _host: string, _database: string, _password: string, _port: number) {
+        if (MyTwitchDBEndpoint.instance !== undefined) {
+            console.error(chalk.red('MyTwitchDBEndpoint instance already exists.'));
+            return;
+        }
+        
         super(user, _host, _database, _password, _port);
     };
 
