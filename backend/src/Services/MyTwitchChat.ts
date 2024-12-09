@@ -16,17 +16,6 @@ export class MyTwitchChat extends TwitchIRCSocket {
     }
 
     //================================//
-    protected onReceivedTwitchMessage(_channel: string, _tags: any, _message: string, _self: boolean): void {
-        if (_self) return;
-
-        this.ListeningSocketServers.forEach(server => {
-            server.SendMessage('chat-message', { username: _tags.username, message: _message, channel: _channel });
-        });
-
-        this.SendChatMessage(_channel, `Hello ! ${_tags.username}!`);
-    }
-
-    //================================//
     public addListenerServer(_server: SingleSocketServer): void {
         if (_server === null) return;
 
@@ -48,5 +37,16 @@ export class MyTwitchChat extends TwitchIRCSocket {
         } catch (error: any) {
             console.error(chalk.red('Error sending message: ', error));
         }
+    }
+
+    //================================//
+    protected onReceivedTwitchMessage(_channel: string, _tags: any, _message: string, _self: boolean): void {
+        if (_self) return;
+
+        this.ListeningSocketServers.forEach(server => {
+            server.SendMessage('chat-message', { username: _tags.username, message: _message, channel: _channel });
+        });
+
+        this.SendChatMessage(_channel, `Hello ! ${_tags.username}!`);
     }
 }

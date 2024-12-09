@@ -1,3 +1,4 @@
+import { start } from 'repl';
 import { TokenData } from '../Interfaces/TokenInterfaces.js';
 import { DatabaseConnectionEndpoint } from './DatabaseConnectionEndpoint.js';
 import axios from 'axios';
@@ -8,6 +9,7 @@ export class MyTokenManager extends DatabaseConnectionEndpoint{
     private static instance: MyTokenManager;
     private TokenData: TokenData | null = null;
     private static TWITCH_TOKEN_URL = 'https://id.twitch.tv/oauth2/token';
+    private static REFRESH_LIMIT = 600000; // 10 minutes
 
 
     //================================//
@@ -34,7 +36,7 @@ export class MyTokenManager extends DatabaseConnectionEndpoint{
 
     //================================//
     private async GetTokenData(): Promise<TokenData | null> {
-        const query = `SELECT access_token, refresh_token, expires_at FROM base_tokens;`;
+        const query = `SELECT access_token, refresh_token, expires_at FROM base_tokens LIMIT 1;`;
         try {
             const result = await this.queryDatabase(query);
             return result.rows[0];
@@ -83,12 +85,14 @@ export class MyTokenManager extends DatabaseConnectionEndpoint{
                 }
 
                 console.log(chalk.green('Access token refreshed.'));
+                this.instance.setRefreshScheduler(this.instance.TokenData?.expires_at);
                 return true;
             } catch (error: any) {
                 console.error(chalk.red('Error initializing token manager: ', error));
                 return false;
             }
         }
+
         return false;
     }
 
@@ -126,5 +130,28 @@ export class MyTokenManager extends DatabaseConnectionEndpoint{
         this.TokenData = newTokenData;
 
         return await MyTokenManager.UpdateTokenData(newTokenData);
+    }
+
+    //================================//
+    private setRefreshScheduler(_expires_at: Date | undefined): void {
+        if (!_expires_at) {
+            console.error(chalk.red('No expires_at date found.'));
+            return;
+        }
+
+        const refreshInterval = _expires_at.getTime() - Date.now() - MyTokenManager.REFRESH_LIMIT;
+
+        if (refreshInterval <= 0) {
+            console.log(chalk.yellow('Token about to expire, trying to refresh now...'));
+            return;
+        } else {
+            console.log(chalk.green(`Token refresh scheduled in ${refreshInterval / 1000} seconds.`));
+            setTimeout(async () => {
+                await this.refreshAccessToken();
+                if (this.TokenData) {
+                    this.setRefreshScheduler(this.TokenData.expires_at);
+                }
+            }, refreshInterval);
+        }
     }
 }
