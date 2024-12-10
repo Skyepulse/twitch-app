@@ -1,3 +1,4 @@
+import { MyTwitchDBEndpoint } from "./MyTwitchDBEndpoint.js";
 import { SingleSocketServer } from "./SingleSocketServer.js";
 import { TwitchIRCSocket } from "./TwitchIRCSocket.js";
 import chalk from "chalk";
@@ -47,6 +48,44 @@ export class MyTwitchChat extends TwitchIRCSocket {
             server.SendMessage('chat-message', { username: _tags.username, message: _message, channel: _channel });
         });
 
-        this.SendChatMessage(_channel, `Hello ! ${_tags.username}!`);
+        switch (_message) {
+            case '!ping':
+                this.SendChatMessage(_channel, `Pong! {${_tags.username}}`);
+                break;
+            case '!hello':
+                this.SendChatMessage(_channel, `Hello! {${_tags.username}}`);
+                break;
+            case '!register':
+                MyTwitchDBEndpoint.RegisterUser(_tags.username, _tags['user-id'], 0).then((result) => {
+                    if (result === 1) {
+                        this.SendChatMessage(_channel, `Registered {${_tags.username}}`);
+                    } else if (result === 0) {
+                        this.SendChatMessage(_channel, `You are already registered {${_tags.username}}`);
+                    } else if (result === -1) {
+                        this.SendChatMessage(_channel, `Error registering {${_tags.username}}. We are sorry!`);
+                    }
+                });
+                break;
+            case '!click':
+                MyTwitchDBEndpoint.AddClick(_tags['user-id'], 1).then((result) => {
+                    if ( result === 0){
+                        this.SendChatMessage(_channel, `You are not registered {${_tags.username}}! Use !register to register!`);
+                    } else if (result === -1) {
+                        this.SendChatMessage(_channel, `There was an error registering your click... {${_tags.username}}!`);
+                    }
+                });
+                break;
+            case '!unregister':
+                MyTwitchDBEndpoint.UnregisterUser(_tags['user-id']).then((result) => {
+                    if (result === 1) {
+                        this.SendChatMessage(_channel, `Unregistered {${_tags.username}}`);
+                    } else if (result === 0) {
+                        this.SendChatMessage(_channel, `You are not registered {${_tags.username}}! Use !register to register!`);
+                    } else if (result === -1) {
+                        this.SendChatMessage(_channel, `Error unregistering {${_tags.username}}. We are sorry!`);
+                    }
+                });
+                break;
+        }
     }
 }

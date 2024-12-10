@@ -1,6 +1,7 @@
 import { DatabaseConnectionEndpoint } from "./DatabaseConnectionEndpoint.js";
 import { UserInfo, FullUserInfo, UserClicks } from "../Interfaces/DataBaseInterfaces.js";
 import chalk from "chalk";
+import internal from "node:stream";
 
 //================================//
 export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
@@ -89,6 +90,18 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
     }
 
     //================================//
+    private async addClicks(_id: string, _clicks: number): Promise<boolean> {
+        const query = `UPDATE base_clicks SET click_count = click_count + ${_clicks} WHERE user_id = '${_id}';`;
+        try {
+            await this.queryDatabase(query);
+            return true;
+        } catch (error: any) {
+            console.error(chalk.red('Error adding clicks: ', error));
+            return false;
+        }
+    }
+
+    //================================//
     public static RemoveUser(_id: string): Promise<boolean> {  
         if (MyTwitchDBEndpoint.instance === undefined) {
             console.error(chalk.red('MyTwitchDBEndpoint instance is undefined'));
@@ -148,5 +161,69 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
             MyTwitchDBEndpoint.instance = new MyTwitchDBEndpoint(user, _host, _database, _password, _port);
         }
     }
+
+    //================================//
+    public static async RegisterUser(_name: string, _id: string, _baseClickCount: number): Promise<number> {
+        // Check if his ID is already in the database
+        MyTwitchDBEndpoint.GetUserClicks(_id).then((clicks) => {
+            if (clicks.user_id === -1) {
+                // If not, add him
+                MyTwitchDBEndpoint.AddUser(_name, _id, _baseClickCount).then((result) => {
+                    if (result) {
+                        return 1;
+                    } else {
+                        return -1;
+                    }
+                });
+            } else {
+                return 0;
+            }
+        });
+        return -1;
+    }
+
+    //================================//
+    public static async AddClick(_id: string, _clicks: number): Promise<number> {
+        if (MyTwitchDBEndpoint.instance === undefined) {
+            console.error(chalk.red('MyTwitchDBEndpoint instance is undefined'));
+            return -1;
+        }
+        MyTwitchDBEndpoint.instance.getUserClicks(_id).then((clicks) => {
+            if (clicks.user_id === -1) {
+                return 0;
+            }
+            MyTwitchDBEndpoint.instance.addClicks(_id, _clicks).then((result) => {
+                if (result) {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            });
+        });
+        return -1;
+    }
+
+    //================================//
+    public static async UnregisterUser(_id: string): Promise<number> {
+        if (MyTwitchDBEndpoint.instance === undefined) {
+            console.error(chalk.red('MyTwitchDBEndpoint instance is undefined'));
+            return -1;
+        }
+        MyTwitchDBEndpoint.instance.getUserClicks(_id).then((clicks) => {
+            if (clicks.user_id === -1) {
+                return 0;
+            }
+            MyTwitchDBEndpoint.AddClick('1', clicks.click_count);
+            MyTwitchDBEndpoint.RemoveUser(_id).then((result) => {
+                if (result) {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            });
+        });
+        return -1;
+    }
+    
 }
         
