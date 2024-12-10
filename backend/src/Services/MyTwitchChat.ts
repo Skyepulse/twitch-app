@@ -10,10 +10,19 @@ export class MyTwitchChat extends TwitchIRCSocket {
     //================================//
     constructor(_username: string, _channels: string[], _debug: boolean = false) {
         super(_username, _channels, _debug);
+    }
+
+    //================================//
+    public override initializeConnection(): void {
+        super.initializeConnection();
 
         this.getTwitchClient().on('message', (_channel: string, _tags: any, _message: string, _self: boolean) => {
             this.onReceivedTwitchMessage(_channel, _tags, _message, _self);
         });
+
+        setInterval(() => {
+            this.SendTotalClicks();
+        }, 2000);
     }
 
     //================================//
@@ -32,6 +41,19 @@ export class MyTwitchChat extends TwitchIRCSocket {
     }
 
     //================================//
+    private SendTotalClicks(){
+        MyTwitchDBEndpoint.GetTotalClicks().then((result) => {
+            if (result === -1) {
+                console.error(chalk.red('Error getting total clicks!'));
+            } else {
+                this.ListeningSocketServers.forEach(server => {
+                    server.SendMessage('total-clicks', { totalClicks: result });
+                });
+            }
+        });
+    }   
+
+    //================================//
     public SendChatMessage(_channel: string, _message: string): void {
         try {
             this.getTwitchClient().say(_channel, _message);
@@ -43,6 +65,7 @@ export class MyTwitchChat extends TwitchIRCSocket {
     //================================//
     protected onReceivedTwitchMessage(_channel: string, _tags: any, _message: string, _self: boolean): void {
         if (_self) return;
+
 
         this.ListeningSocketServers.forEach(server => {
             server.SendMessage('chat-message', { username: _tags.username, message: _message, channel: _channel });

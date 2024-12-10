@@ -30,10 +30,28 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
     }
 
     //================================//
+    private async getTotalClicks(): Promise<number> {
+        const query = `SELECT SUM(click_count) FROM base_clicks;`;
+        try {
+            const result = await this.queryDatabase(query);
+            if (result.rows.length === 0) {
+                return -1;
+            }
+            return result.rows[0].sum;
+        } catch (error: any) {
+            console.error(chalk.red('Error getting total clicks: ', error));
+            return -1;
+        }
+    }
+
+    //================================//
     private async getUsersInfo(): Promise<UserInfo[]> {
         const query = `SELECT user_id, username FROM base_clicks;`;
         try {
             const result = await this.queryDatabase(query);
+            if (result.rows.length === 0) {
+                return [];
+            }
             return result.rows;
         } catch (error: any) {
             console.error(chalk.red('Error getting users info: ', error));
@@ -46,6 +64,9 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
         const query = `SELECT user_id, username, click_count FROM base_clicks;`;
         try {
             const result = await this.queryDatabase(query);
+            if (result.rows.length === 0) {
+                return [];
+            }
             return result.rows;
         } catch (error: any) {
             console.error(chalk.red('Error getting full user info: ', error));
@@ -58,6 +79,9 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
         const query = `SELECT user_id, click_count FROM base_clicks WHERE user_id = '${_id}';`;
         try {
             const result = await this.queryDatabase(query);
+            if (result.rows.length === 0) {
+                return { user_id: -1, click_count: -1 };
+            }
             return result.rows[0];
         } catch (error: any) {
             console.error(chalk.red('Error getting user clicks: ', error));
@@ -70,6 +94,9 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
         const query = `SELECT username FROM base_clicks WHERE user_id = '${_id}';`;
         try {
             const result = await this.queryDatabase(query);
+            if (result.rows.length === 0) {
+                return '';
+            }
             return result.rows[0].username;
         } catch (error: any) {
             console.error(chalk.red('Error getting user name: ', error));
@@ -99,6 +126,15 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
             console.error(chalk.red('Error adding clicks: ', error));
             return false;
         }
+    }
+
+    //================================//
+    public static GetTotalClicks(): Promise<number> {
+        if (MyTwitchDBEndpoint.instance === undefined) {
+            console.error(chalk.red('MyTwitchDBEndpoint instance is undefined'));
+            return new Promise((resolve, reject) => { resolve(-1) });
+        }
+        return MyTwitchDBEndpoint.instance.getTotalClicks();
     }
 
     //================================//
@@ -164,22 +200,27 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
 
     //================================//
     public static async RegisterUser(_name: string, _id: string, _baseClickCount: number): Promise<number> {
-        // Check if his ID is already in the database
-        MyTwitchDBEndpoint.GetUserClicks(_id).then((clicks) => {
-            if (clicks.user_id === -1) {
-                // If not, add him
-                MyTwitchDBEndpoint.AddUser(_name, _id, _baseClickCount).then((result) => {
-                    if (result) {
-                        return 1;
-                    } else {
-                        return -1;
-                    }
-                });
-            } else {
+        if (MyTwitchDBEndpoint.instance === undefined) {
+            console.error(chalk.red('MyTwitchDBEndpoint instance is undefined'));
+            return -1;
+        }
+
+        try {
+            const clicks = await MyTwitchDBEndpoint.instance.getUserClicks(_id);
+            if (clicks.user_id !== -1) {
                 return 0;
             }
-        });
-        return -1;
+
+            const result = await MyTwitchDBEndpoint.instance.addUser(_name, _id, _baseClickCount);
+            if (result) {
+                return 1;
+            } else {
+                return -1;
+            }
+        } catch (error: any) {
+            console.error(chalk.red('Error registering user: ', error));
+            return -1;
+        }
     }
 
     //================================//
@@ -188,19 +229,23 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
             console.error(chalk.red('MyTwitchDBEndpoint instance is undefined'));
             return -1;
         }
-        MyTwitchDBEndpoint.instance.getUserClicks(_id).then((clicks) => {
+
+        try{
+            const clicks = await MyTwitchDBEndpoint.instance.getUserClicks(_id);
             if (clicks.user_id === -1) {
                 return 0;
             }
-            MyTwitchDBEndpoint.instance.addClicks(_id, _clicks).then((result) => {
-                if (result) {
-                    return 1;
-                } else {
-                    return -1;
-                }
-            });
-        });
-        return -1;
+
+            const result = await MyTwitchDBEndpoint.instance.addClicks(_id, _clicks);
+            if (result) {
+                return 1;
+            } else {
+                return -1;
+            }
+        } catch (error: any) {
+            console.error(chalk.red('Error adding click: ', error));
+            return -1;
+        }
     }
 
     //================================//
@@ -209,21 +254,25 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
             console.error(chalk.red('MyTwitchDBEndpoint instance is undefined'));
             return -1;
         }
-        MyTwitchDBEndpoint.instance.getUserClicks(_id).then((clicks) => {
+
+        try {
+            const clicks = await MyTwitchDBEndpoint.instance.getUserClicks(_id);
             if (clicks.user_id === -1) {
                 return 0;
             }
-            MyTwitchDBEndpoint.AddClick('1', clicks.click_count);
-            MyTwitchDBEndpoint.RemoveUser(_id).then((result) => {
-                if (result) {
-                    return 1;
-                } else {
-                    return -1;
-                }
-            });
-        });
-        return -1;
+
+            const _ = await MyTwitchDBEndpoint.instance.addClicks('1', clicks.click_count);
+
+            const result = await MyTwitchDBEndpoint.instance.removeUser(_id);
+            if (result) {
+                return 1;
+            } else {
+                return -1;
+            }
+        } catch (error: any) {
+            console.error(chalk.red('Error unregistering user: ', error));
+            return -1;
+        }
     }
-    
 }
         

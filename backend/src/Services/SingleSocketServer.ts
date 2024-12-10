@@ -7,7 +7,13 @@ export abstract class SingleSocketServer {
 
     //================================//
     constructor(_server: any, _origin: string) {
-        this.m_io = new Server(_server);
+        this.m_io = new Server(_server,
+            {
+                cors: {
+                    origin: _origin,
+                    methods: ['GET', 'POST']
+                }
+            });
 
         this.m_io.on('connection', (socket) => {
             this.onClientConnection(socket);

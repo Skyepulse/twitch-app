@@ -3,12 +3,17 @@ import io from "socket.io-client";
 
 const Chat: React.FC = () => {
     const [messages, setMessages] = useState<{ username: string, message: string, channel: string }[]>([]);
+    const [totalClicks, setTotalClicks] = useState<number>(0);
     
     useEffect(() => {
         const socket = io('http://localhost:5000');
         
         socket.on('chat-message', (message:{ username: string, message: string, channel: string }) => {
             setMessages((prevMessages) => [...prevMessages, message]);
+        });
+
+        socket.on('total-clicks', (data: { totalClicks: number }) => {
+            setTotalClicks(data.totalClicks);
         });
         
         return () => {
@@ -18,7 +23,7 @@ const Chat: React.FC = () => {
 
     return (
         <div>
-            <h1>Chat</h1>
+            <h1>Chat total clicks: {totalClicks}</h1>
             <ul>
                 {messages.map((message, index) => (
                     <li key={index}>
