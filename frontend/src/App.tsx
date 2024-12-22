@@ -8,7 +8,7 @@ const SecondPage: React.FC = () => (<h1>Second Page</h1>);
 
 function App() {
   return (
-    <Router>
+  <Router>
     <React.Suspense fallback={<div>...Loading...</div>}>
       <Routes>
         <Route path="/" element={<Chat />} />

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
+import './Chat.css';
 
 const Chat: React.FC = () => {
     const [messages, setMessages] = useState<{ username: string, message: string, channel: string }[]>([]);
@@ -22,7 +23,7 @@ const Chat: React.FC = () => {
     }, []);
 
     return (
-        <div>
+        <div className="chat-wrapper">
             <h1>Chat total clicks: {totalClicks}</h1>
             <ul>
                 {messages.map((message, index) => (
