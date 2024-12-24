@@ -58,7 +58,7 @@ export class TwitchIRCSocket {
 
         this.m_twitchClient.connect()
             .then(() => {
-                console.log(chalk.green('Connected to Twitch'));
+                console.log(chalk.green('Connected to Twitch with username'));
             })
             .catch((error: any) => {
                 console.error(chalk.red('Error connecting to Twitch: ', error));

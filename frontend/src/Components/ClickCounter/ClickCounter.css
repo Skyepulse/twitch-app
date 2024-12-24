@@ -1,0 +1,25 @@
+@font-face {
+    font-family: 'Ozone';
+    src: url('../../../fonts/ozone-font/Ozone-xRRO.ttf') format('truetype');
+}
+
+.click-counter-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}
+
+.click-counter-wrapper h1 {
+    font-size: 20rem;
+    margin: 0;
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-family: 'Ozone', sans-serif;
+    color: red;
+}

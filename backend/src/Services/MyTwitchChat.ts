@@ -23,6 +23,10 @@ export class MyTwitchChat extends TwitchIRCSocket {
         setInterval(() => {
             this.SendTotalClicks();
         }, 2000);
+
+        setInterval(() => {
+            this.sendTopNClickers(3);
+        }, 2000);
     }
 
     //================================//
@@ -54,6 +58,19 @@ export class MyTwitchChat extends TwitchIRCSocket {
     }   
 
     //================================//
+    private sendTopNClickers(_n: number){
+        MyTwitchDBEndpoint.GetTopNClickers(_n).then((result) => {
+            if (result === null) {
+                console.error(chalk.red('Error getting top clickers!'));
+            } else {
+                this.ListeningSocketServers.forEach(server => {
+                    server.SendMessage('top-clickers', { topClickers: result });
+                });
+            }
+        });
+    }
+
+    //================================//
     public SendChatMessage(_channel: string, _message: string): void {
         try {
             this.getTwitchClient().say(_channel, _message);
@@ -71,6 +88,13 @@ export class MyTwitchChat extends TwitchIRCSocket {
             server.SendMessage('chat-message', { username: _tags.username, message: _message, channel: _channel });
         });
 
+        if (_message.startsWith('!')) {
+            this.onReceivedCommand(_channel, _tags, _message);
+        }
+    }
+
+    //================================//
+    protected onReceivedCommand(_channel: string, _tags: any, _message: string): void {
         switch (_message) {
             case '!ping':
                 this.SendChatMessage(_channel, `Pong! {${_tags.username}}`);
@@ -108,6 +132,9 @@ export class MyTwitchChat extends TwitchIRCSocket {
                         this.SendChatMessage(_channel, `Error unregistering {${_tags.username}}. We are sorry!`);
                     }
                 });
+                break;
+            default:
+                this.SendChatMessage(_channel, `The command ${_message} does not exist. Use !help to see the available commands.`);
                 break;
         }
     }

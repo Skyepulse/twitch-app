@@ -1,35 +1,33 @@
-.chat-wrapper {
+.top-clickers-wrapper {
   display: flex;
-  align-content: center;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 200%;
+  width: auto;
+  padding-top: 30px;
+}
+
+.top-clickers-wrapper h1 {
+  font-size: 2rem;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
   justify-content: center;
   height: 100%;
   width: 100%;
 }
 
-h1 {
-  font-size: 2rem;
-  margin: 0;
-  padding: 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  width: 40%;
-}
-
-ul {
-  font-size: 0.8rem;
-
-  list-style-type: none;
+.top-clickers-wrapper ul {
+  font-size: 1rem;
   padding: 0;
   margin: 0;
-
   display: flex;
   flex-direction: column;
   align-items: left;
-  justify-content: center;
-
+  justify-content: left;
   height: 100%;
-  width: 60%;
+  width: 100%;
 }
+

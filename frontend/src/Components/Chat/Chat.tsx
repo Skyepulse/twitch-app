@@ -1,32 +1,16 @@
 import React, { useEffect, useState } from "react";
-import io from "socket.io-client";
 import './Chat.css';
 
-const Chat: React.FC = () => {
-    const [messages, setMessages] = useState<{ username: string, message: string, channel: string }[]>([]);
-    const [totalClicks, setTotalClicks] = useState<number>(0);
-    
-    useEffect(() => {
-        const socket = io('http://localhost:5000');
-        
-        socket.on('chat-message', (message:{ username: string, message: string, channel: string }) => {
-            setMessages((prevMessages) => [...prevMessages, message]);
-        });
+interface ChatProps {
+    messages: { username: string, message: string, channel: string }[];
+}
 
-        socket.on('total-clicks', (data: { totalClicks: number }) => {
-            setTotalClicks(data.totalClicks);
-        });
-        
-        return () => {
-            socket.disconnect();
-        };
-    }, []);
-
+const Chat: React.FC<ChatProps> = ({messages}) => {
     return (
         <div className="chat-wrapper">
-            <h1>Chat total clicks: {totalClicks}</h1>
+            <h1>Chat Messages</h1>
             <ul>
-                {messages.map((message, index) => (
+                {messages.slice(-3).map((message, index) => (
                     <li key={index}>
                         <strong>{message.username}</strong>: {message.message}
                     </li>

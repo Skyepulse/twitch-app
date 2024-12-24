@@ -105,6 +105,25 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
     }
 
     //================================//
+    private async getTopNClickers(_n: number): Promise<FullUserInfo[]> {
+        if (_n <= 0) {
+            return [];
+        }
+
+        const query = `SELECT user_id, username, click_count FROM base_clicks WHERE user_id != 1 ORDER BY click_count DESC LIMIT ${_n};`;
+        try {
+            const result = await this.queryDatabase(query);
+            if (result.rows.length === 0) {
+                return [];
+            }
+            return result.rows;
+        } catch (error: any) {
+            console.error(chalk.red('Error getting top clickers: ', error));
+            return [];
+        }
+    }
+
+    //================================//
     private async removeUser(_id: string): Promise<boolean> {
         const query = `DELETE FROM base_clicks WHERE user_id = '${_id}';`;
         try {
@@ -126,6 +145,15 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
             console.error(chalk.red('Error adding clicks: ', error));
             return false;
         }
+    }
+
+    //================================//
+    public static GetTopNClickers(_n: number): Promise<UserClicks[]> {
+        if (MyTwitchDBEndpoint.instance === undefined) {
+            console.error(chalk.red('MyTwitchDBEndpoint instance is undefined'));
+            return new Promise((resolve, reject) => { resolve([]) });
+        }
+        return MyTwitchDBEndpoint.instance.getTopNClickers(_n);
     }
 
     //================================//
