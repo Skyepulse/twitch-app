@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
+import TCline from "./TCline/TCline";
 import './TopClickers.css';
 
 interface TopClicksProps {
-    topClickers: { user_id: number, username: string, click_count: number }[];
+    topClickers: { position: number, user_id: number, username: string, click_count: number }[];
 }
 
 const TopClikers: React.FC<TopClicksProps> = ({topClickers}) => {
@@ -11,21 +12,9 @@ const TopClikers: React.FC<TopClicksProps> = ({topClickers}) => {
             <h1>Best Constributors: </h1>
             {topClickers.length > 0 ? (
                 <ul>
-                    {topClickers[0] && (
-                        <li>
-                            <span color="golden">Top 1: {topClickers[0].username} - {topClickers[0].click_count} clicks</span>
-                        </li>
-                    )}
-                    {topClickers[1] && (
-                        <li>
-                            <span>Top 2: {topClickers[1].username} - {topClickers[1].click_count} clicks</span>
-                        </li>
-                    )}
-                    {topClickers[2] && (
-                        <li>
-                            <span>Top 3: {topClickers[2].username} - {topClickers[2].click_count} clicks</span>
-                        </li>
-                    )}
+                    {topClickers.map((tc, index) => (
+                        <TCline key = {index} position={tc.position} username={tc.username} click_count={tc.click_count}/>
+                    ))}
                 </ul>
             ) : (
                 <p>No registered clicks right now!</p>

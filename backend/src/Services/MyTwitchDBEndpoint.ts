@@ -105,12 +105,8 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
     }
 
     //================================//
-    private async getTopNClickers(_n: number): Promise<FullUserInfo[]> {
-        if (_n <= 0) {
-            return [];
-        }
-
-        const query = `SELECT user_id, username, click_count FROM base_clicks WHERE user_id != 1 ORDER BY click_count DESC LIMIT ${_n};`;
+    private async getTopNClickers(): Promise<FullUserInfo[]> {
+        const query = `SELECT user_id, username, click_count FROM base_clicks WHERE user_id != 1 ORDER BY click_count DESC;`;
         try {
             const result = await this.queryDatabase(query);
             if (result.rows.length === 0) {
@@ -148,12 +144,12 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
     }
 
     //================================//
-    public static GetTopNClickers(_n: number): Promise<UserClicks[]> {
+    public static GetTopNClickers(): Promise<FullUserInfo[]> {
         if (MyTwitchDBEndpoint.instance === undefined) {
             console.error(chalk.red('MyTwitchDBEndpoint instance is undefined'));
             return new Promise((resolve, reject) => { resolve([]) });
         }
-        return MyTwitchDBEndpoint.instance.getTopNClickers(_n);
+        return MyTwitchDBEndpoint.instance.getTopNClickers();
     }
 
     //================================//
