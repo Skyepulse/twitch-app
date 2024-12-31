@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/index.ts",
     "build": "tsc",
-    "dev": "nodemon --watch src --ext ts --exec \"node --loader ts-node/esm\" src/index.ts"
+    "dev": "nodemon --watch src --ext ts --exec \"node --loader ts-node/esm\" src/index.ts",
+    "reset": "nodemon --watch src --ext ts --exec \"node --loader ts-node/esm\" src/reset.ts"
   },
   "author": " Elmrys / Skyepulse",
   "license": "ISC",

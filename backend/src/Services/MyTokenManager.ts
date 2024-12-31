@@ -65,6 +65,24 @@ export class MyTokenManager extends DatabaseConnectionEndpoint{
     }
 
     //================================//
+    public static async SimpleTokenChange(user: string, _host: string, _database: string, _password: string, _port: number, _tokenData: TokenData): Promise<boolean> {
+        if (MyTokenManager.instance === undefined) 
+            {
+            MyTokenManager.instance = new MyTokenManager(user, _host, _database, _password, _port);
+            
+            try
+            {
+                console.log(chalk.yellow('Token manager initialized. Trying to update token data...'));
+                return await MyTokenManager.UpdateTokenData(_tokenData);
+            } catch (error: any) {
+                console.error(chalk.red('Error initializing token manager: ', error));
+                return false;
+            }
+        }
+        return false;
+    };
+
+    //================================//
     public static async Init(user: string, _host: string, _database: string, _password: string, _port: number): Promise<boolean> {
         if (MyTokenManager.instance === undefined) {
             MyTokenManager.instance = new MyTokenManager(user, _host, _database, _password, _port);
