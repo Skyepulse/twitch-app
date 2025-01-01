@@ -1,0 +1,50 @@
+{
+    "bonuses": [
+        {
+            "id": 1,
+            "type": "AutoClicker",
+            "levels": [
+                {
+                    "level": 1,
+                    "duration": 60,
+                    "frequency": 1,
+                    "cost": 10,
+                    "name": "Clicker",
+                    "description": "Clicks automatically once per second. Deactivates after a minute from last click."
+                },
+                {
+                    "level": 2,
+                    "duration": 600,
+                    "frequency": 2,
+                    "cost": 50,
+                    "name": "Double Clicker",
+                    "description": "Clicks automatically twice per second. Deactivates after 10 minutes from last click."
+                },
+                {
+                    "level": 3,
+                    "duration": 3600,
+                    "frequency": 4,
+                    "cost": 250,
+                    "name": "Triple Clicker",
+                    "description": "Clicks four times per second. Deactivates after an hour from last click."
+                },
+                {
+                    "level": 4,
+                    "duration": 43200,
+                    "frequency": 8,
+                    "cost": 2000,
+                    "name": "Quad Clicker",
+                    "description": "Clicks eight times per second. Deactivates after a 12 hours from last click."
+                },
+                {
+                    "level": 5,
+                    "duration": 86400,
+                    "frequency": 12,
+                    "cost": 10000,
+                    "name": "Octo Clicker",
+                    "description": "Clicks twelve times per second. Deactivates after a day from last click."
+                }
+            ]
+        }
+   ]
+}

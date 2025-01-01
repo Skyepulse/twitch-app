@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import Chat from '../Chat/Chat';
-import ClickCounter from '../ClickCounter/ClickCounter';
+import ClickCounter, { ClickCounterRef } from '../ClickCounter/ClickCounter';
 import TopClikers from "../Top Clickers/TopClickers";
 import AnimatedClick, {getRandomPosition} from "../AnimatedClick/AnimatedClick";
 import './MainController.css';
@@ -15,6 +15,7 @@ const MainController: React.FC = () => {
     const [clicks, setClicks] = useState<number>(0);
     const [topClickers, setTopClickers] = useState<{ position: number, user_id: number, username: string, click_count: number }[]>([]);
     const middleContainerRef = useRef<HTMLDivElement>(null);
+    const clickCounterRef = useRef<ClickCounterRef>(null);
 
     //------------UseEffects-------------//
     useEffect(() => {
@@ -41,6 +42,10 @@ const MainController: React.FC = () => {
                 if (clicks !== data.totalClicks) {
                     setClicks(data.totalClicks);
                     AnimateClick(middleContainerRef.current, data.totalClicks - clicks);
+
+                    if (clickCounterRef.current) {
+                        clickCounterRef.current.updateScore();
+                    }
                 }
             };
 
@@ -59,7 +64,7 @@ const MainController: React.FC = () => {
                 <TopClikers topClickers = {topClickers}/>
             </div>
             <div ref={middleContainerRef} className="main-controller-body">
-                <ClickCounter clicks = {clicks}/>
+                <ClickCounter ref={clickCounterRef} clicks = {clicks}/>
             </div>
             <div className="main-controller-footer">
                 <Chat messages = {messages}/>

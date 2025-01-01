@@ -5,6 +5,10 @@ import { MyTwitchChat } from './Services/MyTwitchChat.js';
 import { MyTwitchDBEndpoint } from './Services/MyTwitchDBEndpoint.js';
 import { MyTokenManager } from './Services/MyTokenManager.js';
 
+import { BuyableBonusData } from './Models/Gameplay/BuyableBonusData.js';
+import chalk from 'chalk';
+import { IT_AutoClicker } from './Interfaces/GameplayObjects/AutoClickers.js';
+
 //------------Members-------------//
 const PORT = process.env.PORT || '5000';
 const MyApp: BaseExpressApp = new BaseExpressApp(PORT);
@@ -21,6 +25,10 @@ function Init(): void {
             TwitchClient.initializeConnection();
         }
     });
+
+    BuyableBonusData.initialize('./src/Config/Bonuses.json');
+
+    console.log(chalk.blue(BuyableBonusData.getBonusLevels<IT_AutoClicker>(1, 2)?.duration));
 }
 
 Init();

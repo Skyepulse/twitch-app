@@ -3,15 +3,21 @@
     src: url('../../../fonts/ozone-font/Ozone-xRRO.ttf') format('truetype');
 }
 
+:root {
+    --pop-scale: 1.1;
+}
+
 .click-counter-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100%;
     width: 100%;
+
+    overflow: hidden;
 }
 
-.click-counter-wrapper h1 {
+.score {
     font-size: 20rem;
     margin: 0;
     padding: 0;
@@ -20,6 +26,21 @@
     align-items: center;
     justify-content: center;
 
+    transition: transform 0.3s ease;
+    transform-origin: center;
+
     font-family: 'Ozone', sans-serif;
     color: red;
 }
+
+@keyframes score-pop {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(var(--pop-scale));
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
