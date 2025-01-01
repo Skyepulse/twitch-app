@@ -120,7 +120,8 @@ export class MyTwitchChat extends TwitchIRCSocket {
 
     //================================//
     protected onReceivedCommand(_channel: string, _tags: any, _message: string): void {
-        switch (_message) {
+        const firstMessagePart = _message.split(' ')[0];
+        switch (firstMessagePart) {
             case '!ping':
                 this.SendChatMessage(_channel, `Pong! {${_tags.username}}`);
                 break;
@@ -157,6 +158,21 @@ export class MyTwitchChat extends TwitchIRCSocket {
                         this.SendChatMessage(_channel, `You are not registered {${_tags.username}}! Use !register to register!`);
                     } else if (result === -1) {
                         this.SendChatMessage(_channel, `Error unregistering {${_tags.username}}. We are sorry!`);
+                    }
+                });
+                break;
+            case '!upgrade':
+                MyTwitchDBEndpoint.UpgradeBonus(_tags['user-id'], parseInt(_message.split(' ')[1], 10)).then((result) => {
+                    if (result === 1) {
+                        this.SendChatMessage(_channel, `Transaction completed! {${_tags.username}}`);
+                    } else if (result === 0) {
+                        this.SendChatMessage(_channel, `You are not registered {${_tags.username}}! Use !register to register!`);
+                    } else if (result === -1) {
+                        this.SendChatMessage(_channel, `Error upgrading bonus {${_tags.username}}. We are sorry!`);
+                    } else if (result === -2) {
+                        this.SendChatMessage(_channel, `The bonus requested does not exist {${_tags.username}}!`);
+                    } else if (result === -3) {
+                        this.SendChatMessage(_channel, `You do not have enough clicks {${_tags.username}}!`);
                     }
                 });
                 break;

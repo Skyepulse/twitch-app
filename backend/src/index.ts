@@ -6,8 +6,6 @@ import { MyTwitchDBEndpoint } from './Services/MyTwitchDBEndpoint.js';
 import { MyTokenManager } from './Services/MyTokenManager.js';
 
 import { BuyableBonusData } from './Models/Gameplay/BuyableBonusData.js';
-import chalk from 'chalk';
-import { IT_AutoClicker } from './Interfaces/GameplayObjects/AutoClickers.js';
 
 //------------Members-------------//
 const PORT = process.env.PORT || '5000';
@@ -18,6 +16,7 @@ const TwitchClient: MyTwitchChat = new MyTwitchChat(process.env.TWITCH_USERNAME!
 
 function Init(): void {
     TwitchClient.addListenerServer(SocketServer);
+    BuyableBonusData.initialize('./src/Config/Bonuses.json');
 
     MyTwitchDBEndpoint.Init(process.env.DB_USER!, process.env.DB_HOST!, process.env.DB_NAME!, process.env.DB_PASSWORD!, parseInt(process.env.DB_PORT!));
     MyTokenManager.Init(process.env.DB_USER!, process.env.DB_HOST!, process.env.DB_NAME!, process.env.DB_PASSWORD!, parseInt(process.env.DB_PORT!)).then((result: boolean) => {
@@ -25,10 +24,6 @@ function Init(): void {
             TwitchClient.initializeConnection();
         }
     });
-
-    BuyableBonusData.initialize('./src/Config/Bonuses.json');
-
-    console.log(chalk.blue(BuyableBonusData.getBonusLevels<IT_AutoClicker>(1, 2)?.duration));
 }
 
 Init();

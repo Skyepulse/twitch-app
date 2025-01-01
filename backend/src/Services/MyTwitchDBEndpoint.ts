@@ -1,7 +1,7 @@
 import { DatabaseConnectionEndpoint } from "./DatabaseConnectionEndpoint.js";
 import { UserInfo, FullUserInfo, UserClicks } from "../Interfaces/DataBaseInterfaces.js";
 import chalk from "chalk";
-import internal from "node:stream";
+import { BuyableBonusData } from "../Models/Gameplay/BuyableBonusData.js";
 
 //================================//
 export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
@@ -133,12 +133,76 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
 
     //================================//
     private async addClicks(_id: string, _clicks: number): Promise<boolean> {
-        const query = `UPDATE base_clicks SET click_count = click_count + ${_clicks} WHERE user_id = '${_id}';`;
+        const query = `UPDATE base_clicks SET click_count = click_count + ${_clicks}, last_click = NOW() WHERE user_id = '${_id}';`;
         try {
             await this.queryDatabase(query);
             return true;
         } catch (error: any) {
             console.error(chalk.red('Error adding clicks: ', error));
+            return false;
+        }
+    }
+
+    //================================//
+    private async getBonusInfo(_id: string, _bonus_id: number): Promise<number> {
+        const query = `SELECT bonus_level FROM base_user_bonuses WHERE user_id = '${_id}' AND bonus_id = ${_bonus_id};`;
+        try {
+            const result = await this.queryDatabase(query);
+            if (result.rows.length === 0) {
+                return 0;
+            }
+            return result.rows[0].bonus_level;
+        } catch (error: any) {
+            console.error(chalk.red('Error getting bonus info: ', error));
+            return -1;
+        }
+    }
+
+    //================================//
+    private async upgradeBonus(_id: string, _bonus_id: number, _upgrade_cost: number): Promise<boolean> {
+        const query = `
+        DO $$
+        BEGIN 
+            -- DEDUCT POINTS
+            UPDATE base_clicks
+            SET click_count = click_count - ${_upgrade_cost}
+            WHERE user_id = '${_id}' AND click_count >= ${_upgrade_cost};
+
+            IF NOT FOUND THEN
+                RAISE EXCEPTION 'Insufficient points for user %', '${_id}';
+            END IF; 
+
+            --ADD DIFFERENCE TO ClICK_COUNT OF DEFAULT USER WITH ID 1
+            UPDATE base_clicks
+            SET click_count = click_count + ${_upgrade_cost}
+            WHERE user_id = '1';
+
+            --CHECK IF BONUS EXISTS
+            PERFORM 1 FROM base_user_bonuses
+            WHERE user_id = '${_id}' AND bonus_id = ${_bonus_id};
+
+            IF FOUND THEN
+                --UPGRADE BONUS
+                UPDATE base_user_bonuses
+                SET bonus_level = bonus_level + 1
+                WHERE user_id = '${_id}' AND bonus_id = ${_bonus_id} AND bonus_level < 5;
+
+                IF NOT FOUND THEN
+                    RAISE EXCEPTION 'User % already has max level for bonus %', '${_id}', ${_bonus_id};
+                END IF;
+            ELSE
+                --BONUS NOT FOUND, ADD BONUS TO LEVEL 1
+                INSERT INTO base_user_bonuses (user_id, bonus_id, bonus_level)
+                VALUES ('${_id}', ${_bonus_id}, 1);
+            END IF;
+        END $$;
+        `
+
+        try {
+            await this.queryDatabase(query);
+            return true;
+        } catch (error: any) {
+            console.error(chalk.red('Error upgrading bonus: ', error));
             return false;
         }
     }
@@ -295,6 +359,46 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
             }
         } catch (error: any) {
             console.error(chalk.red('Error unregistering user: ', error));
+            return -1;
+        }
+    }
+
+    //================================//
+    public static async UpgradeBonus(_id: string, _bonus_id: number): Promise<number> {
+        if (MyTwitchDBEndpoint.instance === undefined) {
+            console.error(chalk.red('MyTwitchDBEndpoint instance is undefined'));
+            return -1;
+        }
+
+        try {
+            const clicks = await MyTwitchDBEndpoint.instance.getUserClicks(_id);
+            if (clicks.user_id === -1) {
+                return 0;
+            }
+
+            const bonusLevel = await MyTwitchDBEndpoint.instance.getBonusInfo(_id, _bonus_id);
+            if (bonusLevel === -1) {
+                return -1;
+            }
+
+            const bonus = BuyableBonusData.getBonusLevelById(_bonus_id, bonusLevel + 1);
+            if (bonus === null) {
+                return -2;
+            }
+
+            //We check we have sufficient points
+            if (clicks.click_count < bonus.cost) {
+                return -3;
+            }
+
+            const result = await MyTwitchDBEndpoint.instance.upgradeBonus(_id, _bonus_id, bonus.cost);
+            if (result) {
+                return 1;
+            } else {
+                return -1;
+            }
+        } catch (error: any) {
+            console.error(chalk.red('Error upgrading bonus: ', error));
             return -1;
         }
     }
