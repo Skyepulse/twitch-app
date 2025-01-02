@@ -27,7 +27,7 @@ export class MyTwitchChat extends TwitchIRCSocket {
 
         setInterval(() => {
             this.SendTotalClicks();
-        }, 2000);
+        }, 500);
 
         setInterval(() => {
             this.sendTopNClickers(this.n_low, this.n_high);
@@ -147,6 +147,7 @@ export class MyTwitchChat extends TwitchIRCSocket {
                         this.SendChatMessage(_channel, `There was an error registering your click... {${_tags.username}}!`);
                     } else {
                         this.SendTotalClicks();
+                        MyTwitchDBEndpoint.AddAutoClicker(_tags['user-id']);
                     }
                 });
                 break;

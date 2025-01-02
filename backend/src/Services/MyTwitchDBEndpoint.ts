@@ -2,6 +2,9 @@ import { DatabaseConnectionEndpoint } from "./DatabaseConnectionEndpoint.js";
 import { UserInfo, FullUserInfo, UserClicks } from "../Interfaces/DataBaseInterfaces.js";
 import chalk from "chalk";
 import { BuyableBonusData } from "../Models/Gameplay/BuyableBonusData.js";
+import { AutoClickerManager } from "./GamePlay/AutoClickerManager.js";
+import { IT_AutoClicker } from "../Interfaces/GameplayObjects/AutoClickers.js";
+import { console } from "inspector";
 
 //================================//
 export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
@@ -284,6 +287,30 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
         if (MyTwitchDBEndpoint.instance === undefined) {
             MyTwitchDBEndpoint.instance = new MyTwitchDBEndpoint(user, _host, _database, _password, _port);
         }
+    }
+
+    //================================//
+    public static async AddAutoClicker(user_id: string): Promise<void> {
+        if (MyTwitchDBEndpoint.instance === undefined) {
+            console.error(chalk.red('MyTwitchDBEndpoint instance is undefined'));
+            return;
+        }
+
+        const bonusLevel = await MyTwitchDBEndpoint.instance.getBonusInfo(user_id, 1);
+        if (bonusLevel === -1) {
+            console.error(chalk.red('Error getting bonus info for autoclicker on user ', user_id));
+            return;
+        } else if (bonusLevel === 0) {
+            return;
+        }
+
+        const bonus = BuyableBonusData.getBonusLevelById<IT_AutoClicker>(1, bonusLevel);
+        if (bonus === null) {
+            console.error(chalk.red('Error getting bonus level for autoclicker on user ', user_id, ' with bonus level ', bonusLevel));
+            return;
+        }
+
+        AutoClickerManager.setOrResetAutoClicker(user_id,  1 / bonus.frequency, bonus.duration, 1);
     }
 
     //================================//
