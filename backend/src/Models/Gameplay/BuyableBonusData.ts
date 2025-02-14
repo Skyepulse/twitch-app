@@ -68,4 +68,32 @@ export class BuyableBonusData {
 
         return this.getBonusLevelById(id, level);
     }
+
+    //================================//
+    public static getBonusInfoText(bonusesInfo: { bonus_id: number, bonus_level: number }[]): string {
+        let result = '';
+
+        for (const [name, id] of Object.entries(this.m_instance.m_nameToIdDictionary)) {
+            const bonusInfo = bonusesInfo.find(info => info.bonus_id === id);
+            const levels = this.m_instance.m_bonusDictionary[id];
+
+            if (!bonusInfo) {
+                const initialLevel = levels.find(levelData => levelData.level === 1);
+                if (initialLevel) {
+                    result += `${name} [ID ${id}]: Level 1, Price: ${initialLevel.data.cost}\n`;
+                }
+            } else {
+                const currentLevel = bonusInfo.bonus_level;
+                const nextLevel = levels.find(levelData => levelData.level === currentLevel + 1);
+
+                if (nextLevel) {
+                    result += `${name} [ID ${id}]: Level ${currentLevel + 1}, Price: ${nextLevel.data.cost}\n`;
+                } else {
+                    result += `${name} [ID ${id}]: You have reached max level\n`;
+                }
+            }
+        }
+
+        return result;
+    }
 }

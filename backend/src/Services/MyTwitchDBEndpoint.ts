@@ -162,6 +162,21 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
     }
 
     //================================//
+    private async getAllBonusInfo(_id: string): Promise<{ bonus_id: number, bonus_level: number }[]> {
+        const query = `SELECT bonus_id, bonus_level FROM base_user_bonuses WHERE user_id = '${_id}';`;
+        try {
+            const result = await this.queryDatabase(query);
+            if (result.rows.length === 0) {
+                return [];
+            }
+            return result.rows;
+        } catch (error: any) {
+            console.error(chalk.red('Error getting all bonus info: ', error));
+            return [];
+        }
+    }
+
+    //================================//
     private async upgradeBonus(_id: string, _bonus_id: number, _upgrade_cost: number): Promise<boolean> {
         const query = `
         DO $$
@@ -427,6 +442,31 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
         } catch (error: any) {
             console.error(chalk.red('Error upgrading bonus: ', error));
             return -1;
+        }
+    }
+
+    //================================//
+    public static async UpgradeBonusText(_id: string): Promise<string>
+    {
+        if (MyTwitchDBEndpoint.instance === undefined) {
+            console.error(chalk.red('MyTwitchDBEndpoint instance is undefined'));
+            return 'Error with backend service.';
+        }
+
+        try {
+            //we Check if the user is registered
+            const clicks = await MyTwitchDBEndpoint.instance.getUserClicks(_id);
+            if (clicks.user_id === -1) {
+                return 'You are not registered! Use !register to register!';
+            }
+            
+            const result = await MyTwitchDBEndpoint.instance.getAllBonusInfo(_id);
+            return BuyableBonusData.getBonusInfoText(result);
+        }
+
+        catch (error: any) {
+            console.error(chalk.red('Error getting all bonuses info: ', error));
+            return 'Error with backend service.';
         }
     }
 }

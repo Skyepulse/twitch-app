@@ -123,59 +123,81 @@ export class MyTwitchChat extends TwitchIRCSocket {
         const firstMessagePart = _message.split(' ')[0];
         switch (firstMessagePart) {
             case '!ping':
-                this.SendChatMessage(_channel, `Pong! {${_tags.username}}`);
+                this.SendChatMessage(_channel, `Pong! @${_tags.username}`);
                 break;
             case '!hello':
-                this.SendChatMessage(_channel, `Hello! {${_tags.username}}`);
+                this.SendChatMessage(_channel, `Hello! @${_tags.username}`);
                 break;
             case '!register':
                 MyTwitchDBEndpoint.RegisterUser(_tags.username, _tags['user-id'], 0).then((result) => {
                     if (result === 1) {
-                        this.SendChatMessage(_channel, `Registered {${_tags.username}}`);
+                        this.SendChatMessage(_channel, `Registered @${_tags.username}`);
                     } else if (result === 0) {
-                        this.SendChatMessage(_channel, `You are already registered {${_tags.username}}`);
+                        this.SendChatMessage(_channel, `You are already registered @${_tags.username}`);
                     } else if (result === -1) {
-                        this.SendChatMessage(_channel, `Error registering {${_tags.username}}. We are sorry!`);
+                        this.SendChatMessage(_channel, `Error registering @${_tags.username}. We are sorry!`);
                     }
                 });
                 break;
             case '!click':
                 MyTwitchDBEndpoint.AddClick(_tags['user-id'], 1).then((result) => {
                     if ( result === 0){
-                        this.SendChatMessage(_channel, `You are not registered {${_tags.username}}! Use !register to register!`);
+                        this.SendChatMessage(_channel, `You are not registered @${_tags.username}! Use !register to register!`);
                     } else if (result === -1) {
-                        this.SendChatMessage(_channel, `There was an error registering your click... {${_tags.username}}!`);
+                        this.SendChatMessage(_channel, `There was an error registering your click... @${_tags.username}!`);
                     } else {
                         this.SendTotalClicks();
                         MyTwitchDBEndpoint.AddAutoClicker(_tags['user-id']);
                     }
                 });
                 break;
+            case '!myClicks':
+                MyTwitchDBEndpoint.GetUserClicks(_tags['user-id']).then((result) => {
+                    if (result === null) {
+                        this.SendChatMessage(_channel, `You are not registered @${_tags.username}! Use !register to register!`);
+                    } else {
+                        this.SendChatMessage(_channel, `@${_tags.username} you have ${result.click_count} clicks!`);
+                    }
+                });
             case '!unregister':
                 MyTwitchDBEndpoint.UnregisterUser(_tags['user-id']).then((result) => {
                     if (result === 1) {
-                        this.SendChatMessage(_channel, `Unregistered {${_tags.username}}`);
+                        this.SendChatMessage(_channel, `Unregistered @${_tags.username}`);
                     } else if (result === 0) {
-                        this.SendChatMessage(_channel, `You are not registered {${_tags.username}}! Use !register to register!`);
+                        this.SendChatMessage(_channel, `You are not registered @${_tags.username}! Use !register to register!`);
                     } else if (result === -1) {
-                        this.SendChatMessage(_channel, `Error unregistering {${_tags.username}}. We are sorry!`);
+                        this.SendChatMessage(_channel, `Error unregistering @${_tags.username}. We are sorry!`);
                     }
                 });
                 break;
             case '!upgrade':
-                MyTwitchDBEndpoint.UpgradeBonus(_tags['user-id'], parseInt(_message.split(' ')[1], 10)).then((result) => {
-                    if (result === 1) {
-                        this.SendChatMessage(_channel, `Transaction completed! {${_tags.username}}`);
-                    } else if (result === 0) {
-                        this.SendChatMessage(_channel, `You are not registered {${_tags.username}}! Use !register to register!`);
-                    } else if (result === -1) {
-                        this.SendChatMessage(_channel, `Error upgrading bonus {${_tags.username}}. We are sorry!`);
-                    } else if (result === -2) {
-                        this.SendChatMessage(_channel, `The bonus requested does not exist {${_tags.username}}!`);
-                    } else if (result === -3) {
-                        this.SendChatMessage(_channel, `You do not have enough clicks {${_tags.username}}!`);
-                    }
+                if (_message.replace(/\s+/g, '') === '!upgrade') 
+                {
+                    MyTwitchDBEndpoint.UpgradeBonusText(_tags['user-id']).then((result) => {
+                        if (result) {
+                            this.SendChatMessage(_channel, `@${_tags.username} Here is your upgrade options: ${result}`);
+                        }
                 });
+                }
+                else
+                {
+                    MyTwitchDBEndpoint.UpgradeBonus(_tags['user-id'], parseInt(_message.split(' ')[1], 10)).then((result) => {
+                        if (result === 1) {
+                            this.SendChatMessage(_channel, `Transaction completed! @${_tags.username}`);
+                        } else if (result === 0) {
+                            this.SendChatMessage(_channel, `You are not registered @${_tags.username}! Use !register to register!`);
+                        } else if (result === -1) {
+                            this.SendChatMessage(_channel, `Error upgrading bonus @${_tags.username}. We are sorry!`);
+                        } else if (result === -2) {
+                            this.SendChatMessage(_channel, `The bonus requested does not exist @${_tags.username}!`);
+                        } else if (result === -3) {
+                            this.SendChatMessage(_channel, `You do not have enough clicks @${_tags.username}!`);
+                        }
+                    });
+                }
+                break;
+            case '!help':
+                this.SendChatMessage(_channel, `Available commands: !ping, !hello, !register, !click, !myClicks, !unregister, !upgrade, !help`);
                 break;
             default:
                 this.SendChatMessage(_channel, `The command ${_message} does not exist. Use !help to see the available commands.`);
