@@ -4,7 +4,8 @@
   "description": "Root project to manage frontend and backend apps",
   "scripts": {
     "postinstall": "npm install --prefix frontend && npm install --prefix backend",
-    "start": "concurrently \"npm:start --prefix frontend\" \"npm:dev --prefix backend\""
+    "start": "concurrently \"npm:start --prefix frontend\" \"npm:dev --prefix backend\"",
+    "reset": "npm run reset --prefix backend"
   },
   "author": "Elmrys / Skyepulse",
   "license": "ISC",
