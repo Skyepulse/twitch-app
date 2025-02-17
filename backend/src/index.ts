@@ -18,7 +18,7 @@ function Init(): void {
     TwitchClient.addListenerServer(SocketServer);
     BuyableBonusData.initialize('./src/Config/Bonuses.json');
 
-    MyTwitchDBEndpoint.Init(process.env.DB_USER!, process.env.DB_HOST!, process.env.DB_NAME!, process.env.DB_PASSWORD!, parseInt(process.env.DB_PORT!));
+    MyTwitchDBEndpoint.Init(process.env.DB_USER!, process.env.DB_HOST!, process.env.DB_NAME!, process.env.DB_PASSWORD!, parseInt(process.env.DB_PORT || '5432'));
     MyTokenManager.Init(process.env.DB_USER!, process.env.DB_HOST!, process.env.DB_NAME!, process.env.DB_PASSWORD!, parseInt(process.env.DB_PORT!)).then((result: boolean) => {
         if (result) {
             TwitchClient.initializeConnection();

@@ -40,6 +40,8 @@ build/Release
 
 my-server-app/build/
 
+backend/dist/
+
 # Dependency directories
 node_modules/
 jspm_packages/
