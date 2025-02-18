@@ -4,10 +4,10 @@ import { MyTokenManager } from './MyTokenManager.js';
 
 //================================//
 export class TwitchIRCSocket {
-    private m_twitchClient: tmi.Client;
-    private m_username: string;
-    private m_channels: string[];
-    private m_debug: boolean;
+    protected m_twitchClient: tmi.Client;
+    protected m_username: string;
+    protected m_channels: string[];
+    protected m_debug: boolean;
 
     //================================//
     constructor( _username: string, _channels: string[], _debug: boolean = false) {
@@ -35,6 +35,11 @@ export class TwitchIRCSocket {
     }
 
     //================================//
+    protected onCorrectConnection(): void {
+        console.log(chalk.green('Connected to Twitch with username'));
+    }
+
+    //================================//
     public initializeConnection(): void {
         let tokenData = MyTokenManager.GetCurrentToken();
 
@@ -58,7 +63,7 @@ export class TwitchIRCSocket {
 
         this.m_twitchClient.connect()
             .then(() => {
-                console.log(chalk.green('Connected to Twitch with username'));
+                this.onCorrectConnection();
             })
             .catch((error: any) => {
                 console.error(chalk.red('Error connecting to Twitch: ', error));

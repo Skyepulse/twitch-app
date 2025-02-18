@@ -20,7 +20,7 @@ export class MyTwitchChat extends TwitchIRCSocket {
     //================================//
     public override initializeConnection(): void {
         super.initializeConnection();
-
+        
         this.getTwitchClient().on('message', (_channel: string, _tags: any, _message: string, _self: boolean) => {
             this.onReceivedTwitchMessage(_channel, _tags, _message, _self);
         });
@@ -42,6 +42,12 @@ export class MyTwitchChat extends TwitchIRCSocket {
                 this.n_high = this.topN;
             }
         }, 10000);
+    }
+
+    //================================//
+    public override onCorrectConnection(): void {
+        super.onCorrectConnection();
+        this.SendChatMessage(this.m_channels[0], 'Hello! I am alive!');
     }
 
     //================================//
@@ -153,7 +159,7 @@ export class MyTwitchChat extends TwitchIRCSocket {
                 break;
             case '!myClicks':
                 MyTwitchDBEndpoint.GetUserClicks(_tags['user-id']).then((result) => {
-                    if (result === null) {
+                    if (result.user_id === -1) {
                         this.SendChatMessage(_channel, `You are not registered @${_tags.username}! Use !register to register!`);
                     } else {
                         this.SendChatMessage(_channel, `@${_tags.username} you have ${result.click_count} clicks!`);
