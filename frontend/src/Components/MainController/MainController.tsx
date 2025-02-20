@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
+import { Socket } from "socket.io-client/build/esm/socket";
 import Chat from '../Chat/Chat';
 import ClickCounter, { ClickCounterRef } from '../ClickCounter/ClickCounter';
 import TopClikers from "../Top Clickers/TopClickers";
@@ -10,7 +11,7 @@ import { createRoot } from "react-dom/client";
 //================================//
 const MainController: React.FC = () => {
     //------------Members-------------//
-    const [socket, setSocket] = useState<SocketIOClient.Socket | null>(null);
+    const socketRef = useRef<SocketIOClient.Socket | null>(null);
     const [messages, setMessages] = useState<{ username: string, message: string, channel: string }[]>([]);
     const [clicks, setClicks] = useState<number>(0);
     const [topClickers, setTopClickers] = useState<{ position: number, user_id: number, username: string, click_count: number }[]>([]);
@@ -19,43 +20,72 @@ const MainController: React.FC = () => {
 
     //------------UseEffects-------------//
     useEffect(() => {
-        const newSocket = io(process.env.REACT_APP_BACKEND_URL || 'https://localhost:5000');
-        setSocket(newSocket);
+        const url = ('ws://' + process.env.REACT_APP_BACKEND_LB + ":" + process.env.REACT_APP_BACKEND_PORT) || 'https://localhost:5000';
+        console.log("Connecting to:", url);
 
-        //------------Handle Messages-------------//
-        newSocket.on('chat-message', (message:{ username: string, message: string, channel: string }) => {
-            setMessages((prevMessages) => [...prevMessages, message]);
-        });
+        if (!socketRef.current) {
+            socketRef.current = io(url, {
+                transports: ["websocket", "polling"], // Ensure different transport options
+                reconnectionAttempts: 5,  // Retry 5 times before failing
+                timeout: 5000, // 5 seconds timeout
+                secure: true, // Use secure connection
+            });
 
-        newSocket.on('top-clickers', (data: { topClickers: { position: number, user_id: number, username: string, click_count: number }[] }) => {
-            setTopClickers(data.topClickers);
-        });
+            socketRef.current.on("connect", () => {
+                console.log("✅ WebSocket Connected:", socketRef.current?.id);
+            });
+    
+            socketRef.current.on("connect_error", (error: Error) => {
+                console.error("❌ Connection Error:", error.message);
+            });
+    
+            socketRef.current.on("disconnect", (reason: Socket.DisconnectReason) => {
+                console.warn("⚠️ Disconnected:", reason);
+            });
+    
+            socketRef.current.on("reconnect_attempt", (attempt: number) => {
+                console.warn(`🔁 Reconnect Attempt #${attempt}`);
+            });
+    
+            socketRef.current.on("reconnect_failed", () => {
+                console.error("❌ WebSocket Reconnection Failed.");
+            });
+    
+            socketRef.current.on('chat-message', (message: { username: string, message: string, channel: string }) => {
+                setMessages((prevMessages) => [...prevMessages, message]);
+            });
+    
+            socketRef.current.on('top-clickers', (data: { topClickers: { position: number, user_id: number, username: string, click_count: number }[] }) => {
+                setTopClickers(data.topClickers);
+            });
+        }
         
         return () => {
-            newSocket.disconnect();
+            socketRef.current?.disconnect();
+            socketRef.current = null;
         };
     }, []);
 
     useEffect(() => {
-        if (socket) {
-            const handleTotalClicks = (data: { totalClicks: number }) => {
-                if (clicks !== data.totalClicks) {
-                    setClicks(data.totalClicks);
-                    AnimateClick(middleContainerRef.current, data.totalClicks - clicks);
+        if (!socketRef.current) return;
 
-                    if (clickCounterRef.current) {
-                        clickCounterRef.current.updateScore();
-                    }
+        const handleTotalClicks = (data: { totalClicks: number }) => {
+            if (clicks !== data.totalClicks) {
+                setClicks(data.totalClicks);
+                AnimateClick(middleContainerRef.current, data.totalClicks - clicks);
+
+                if (clickCounterRef.current) {
+                    clickCounterRef.current.updateScore();
                 }
-            };
+            }
+        };
 
-            socket.on('total-clicks', handleTotalClicks);
+        socketRef.current.on('total-clicks', handleTotalClicks);
 
-            return () => {
-                socket.off('total-clicks', handleTotalClicks);
-            };
-        }
-    }, [socket, clicks]);
+        return () => {
+            socketRef.current?.off('total-clicks', handleTotalClicks);
+        };
+    }, [clicks]);
 
     //------------Structure-------------//
     return (

@@ -4,12 +4,23 @@
   "description": "Root project to manage frontend and backend apps",
   "scripts": {
     "postinstall": "npm install --prefix frontend && npm install --prefix backend",
-    "start": "concurrently \"npm:start --prefix frontend\" \"npm:dev --prefix backend\"",
-    "reset": "npm run reset --prefix backend"
+    "reset": "npm run reset --prefix backend",
+
+    "buildBackend": "npm run build --prefix backend",
+
+    "dev": "cross-env NODE_ENV=development ENV_PATH=.env.local concurrently \"cross-env NODE_ENV=development npm start --prefix frontend\" \"npm:start --prefix backend\"",
+    "prod": "npm:start --prefix frontend",
+
+    "testSocketLocal": "cross-env NODE_ENV=development ENV_PATH=.env.local npm run testSocketConnection --prefix frontend",
+    "testSocketProd": "npm run testSocketConnection --prefix frontend",
+
+    "devBackend": "npm run start --prefix backend",
+    "devFrontend": "cross-env NODE_ENV=development ENV_PATH=.env.local npm run start --prefix frontend"
   },
   "author": "Elmrys / Skyepulse",
   "license": "ISC",
   "devDependencies": {
-    "concurrently": "^9.1.0"
+    "concurrently": "^9.1.0",
+    "cross-env": "^7.0.3"
   }
 }

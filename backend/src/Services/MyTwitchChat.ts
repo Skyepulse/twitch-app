@@ -165,6 +165,7 @@ export class MyTwitchChat extends TwitchIRCSocket {
                         this.SendChatMessage(_channel, `@${_tags.username} you have ${result.click_count} clicks!`);
                     }
                 });
+                break;
             case '!unregister':
                 MyTwitchDBEndpoint.UnregisterUser(_tags['user-id']).then((result) => {
                     if (result === 1) {

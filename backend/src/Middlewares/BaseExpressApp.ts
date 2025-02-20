@@ -9,20 +9,30 @@ export class BaseExpressApp {
     
     //================================//
     constructor(_PORT: string, _hasServer: boolean = true) {
+        console.log("🚀 Initializing Express App on port ..." + _PORT);
         this.app = express();
         this.app.use(express.json());
 
         if (_hasServer) {
+            this.app.get("/", (req, res) => {
+                res.send("✅ Server is running!");
+            });
             this.server = http.createServer(this.app);
             this.initializeServer(_PORT);
+            console.log("Server initialized: ", this.server !== undefined);
         }
     }
 
     //================================//
     private initializeServer( _PORT: string): void {
         if (!this.server) return;
-        this.server.listen(_PORT, () => {
-            console.log(chalk.green('Server running on port' + _PORT));
+
+        this.server.listen(Number(_PORT), '0.0.0.0', () => {  // ✅ Listen on IPv4
+            console.log(chalk.green(`✅ Server running on port ${_PORT}`));
+        });
+
+        this.server.on('listening', () => {
+            console.log("✅ HTTP Server is fully started!");
         });
     }
 
@@ -33,6 +43,6 @@ export class BaseExpressApp {
 
     //================================//
     public AddListenRoute(_route: string, _callback: () => void): void {
-        this.app.listen(_route, _callback);
+        this.app.listen(Number(_route), '0.0.0.0', _callback);
     }
 }

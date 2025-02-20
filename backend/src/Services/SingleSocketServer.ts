@@ -7,6 +7,7 @@ export abstract class SingleSocketServer {
 
     //================================//
     constructor(_server: any, _origin: string) {
+        console.log("🚀 Initializing WebSocket Server...");
         this.m_io = new Server(_server,
             {
                 cors: {
@@ -16,7 +17,12 @@ export abstract class SingleSocketServer {
             });
 
         this.m_io.on('connection', (socket) => {
+            console.log(`✅ New WebSocket connection: ${socket.id}`);
             this.onClientConnection(socket);
+        });
+
+        _server.on('listening', () => {
+            console.log("✅ WebSocket Server is now listening!");
         });
     }
 
@@ -30,6 +36,7 @@ export abstract class SingleSocketServer {
         }
 
         this.m_singleClient = socket;
+        this.m_singleClient.send('You are connected.');
 
         socket.on('disconnect', () => {
             this.m_singleClient = null;
