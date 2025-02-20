@@ -3,6 +3,7 @@ import io from "socket.io-client";
 import { Socket } from "socket.io-client/build/esm/socket";
 import Chat from '../Chat/Chat';
 import ClickCounter, { ClickCounterRef } from '../ClickCounter/ClickCounter';
+import Maze, { MazeRef } from '../Games/Maze/Maze';
 import TopClikers from "../Top Clickers/TopClickers";
 import AnimatedClick, {getRandomPosition} from "../AnimatedClick/AnimatedClick";
 import './MainController.css';
@@ -17,6 +18,7 @@ const MainController: React.FC = () => {
     const [topClickers, setTopClickers] = useState<{ position: number, user_id: number, username: string, click_count: number }[]>([]);
     const middleContainerRef = useRef<HTMLDivElement>(null);
     const clickCounterRef = useRef<ClickCounterRef>(null);
+    const [grid, setGrid] = useState<number[][]>([]);
 
     //------------UseEffects-------------//
     useEffect(() => {
@@ -59,6 +61,15 @@ const MainController: React.FC = () => {
                 setTopClickers(data.topClickers);
             });
         }
+
+        fetch('/maze.txt')
+            .then(res => res.text())
+            .then(text => {
+                const file = new File([text], 'maze.txt');
+                return GetGridFromFile(file);
+            })
+            .then(setGrid)
+            .catch(console.error);
         
         return () => {
             socketRef.current?.disconnect();
@@ -95,6 +106,7 @@ const MainController: React.FC = () => {
             </div>
             <div ref={middleContainerRef} className="main-controller-body">
                 <ClickCounter ref={clickCounterRef} clicks = {clicks}/>
+                <Maze ref={null} position = {[0, 0]} grid = {grid}/>
             </div>
             <div className="main-controller-footer">
                 <Chat messages = {messages}/>
@@ -121,5 +133,41 @@ const AnimateClick = (container: HTMLElement | null, clicks: number) => {
         popupContainer.remove();
     }, 1000); 
 };
+
+//================================//
+const GetGridFromFile = async (file: File): Promise<number[][]> => {
+    const reader = new FileReader();
+    reader.readAsText(file);
+
+    return new Promise<number[][]>((resolve, reject) => {
+        reader.onload = () => {
+            try {
+                const lines = reader.result?.toString().trim().split('\n');
+                if (!lines || lines.length < 2) {
+                    return reject(new Error("Invalid file format: Not enough lines"));
+                }
+
+                const [width, height] = lines[0].trim().split(' ').map(Number);
+                if (isNaN(width) || isNaN(height)) {
+                    return reject(new Error("Invalid width or height in the first line"));
+                }
+
+                const grid = lines.slice(1, height + 1) // Only take `height` lines for safety
+                    .map(row => row.trim().split(/\s+/).map(cell => parseInt(cell, 10)));
+
+                if (grid.length !== height || grid.some(row => row.length !== width)) {
+                    return reject(new Error("Grid dimensions do not match specified width and height"));
+                }
+
+                resolve(grid);
+            } catch (error) {
+                reject(error);
+            }
+        };
+
+        reader.onerror = (error) => reject(error);
+    });
+};
+
 
 export default MainController;

@@ -1,0 +1,29 @@
+.maze-wrapper {
+    display: grid;
+    gap: 0; /* No spacing between grid cells */
+    width: 100%;
+    height: 100%;
+
+    background-color: blue;
+}
+
+.maze-cell {
+    width: 100%;
+    aspect-ratio: 1 / 1; /* Makes the divs square */
+    background-color: transparent;
+    border: 2px solid transparent; /* Default: No border */
+}
+
+/* Add specific borders */
+.border-top {
+    border-top-color: black;
+}
+.border-bottom {
+    border-bottom-color: black;
+}
+.border-left {
+    border-left-color: black;
+}
+.border-right {
+    border-right-color: black;
+}

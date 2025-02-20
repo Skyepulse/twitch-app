@@ -1,6 +1,7 @@
 import { useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
 import './ClickCounter.css';
 import { GetFixedNumber } from '../../Utilities/MathUtilities';
+
 //------------Members-------------//
 const MaxScale: number = 2.0;
 const BaseScale: number = 1.05;
@@ -53,12 +54,18 @@ const ClickCounter = forwardRef<ClickCounterRef, ClickCounterProps>(({ clicks },
       }, []);
 
     return (
-        <div className="click-counter-wrapper">
-            <fit-text>
-                <span className='score' ref={scoreRef}>{clicks}</span>
-            </fit-text>
+    <div className="click-counter-wrapper">
+        <div className="click-counter-under-wrapper">
+            {clicks.toString().length >= 3 ? (
+                <fit-text>
+                    <span className='score' ref={scoreRef}>{clicks}</span>
+                </fit-text>
+            ) : (
+                <span className='score' style={{ fontSize: "30rem" }} ref={scoreRef}>{clicks}</span>
+            )}
         </div>
-    )
+    </div>
+    );
 });
 
 export default ClickCounter;

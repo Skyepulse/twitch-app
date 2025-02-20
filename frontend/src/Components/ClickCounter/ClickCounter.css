@@ -12,13 +12,25 @@
     justify-content: center;
     align-items: center;
     height: 100%;
-    width: 60%;
+    width: 100%;
+
+    background-color: aqua;
 }
 
-.click-counter-wrapper fit-text {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.click-counter-under-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 60%;
+
+  background-color: blueviolet;
+}
+
+.click-counter-wrapper-under-wrapper fit-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .score {
