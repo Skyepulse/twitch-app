@@ -1,7 +1,6 @@
 import { useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
 import './ClickCounter.css';
 import { GetFixedNumber } from '../../Utilities/MathUtilities';
-
 //------------Members-------------//
 const MaxScale: number = 2.0;
 const BaseScale: number = 1.05;
@@ -55,7 +54,9 @@ const ClickCounter = forwardRef<ClickCounterRef, ClickCounterProps>(({ clicks },
 
     return (
         <div className="click-counter-wrapper">
-            <h1 className='score' ref={scoreRef}>{clicks}</h1>
+            <fit-text>
+                <span className='score' ref={scoreRef}>{clicks}</span>
+            </fit-text>
         </div>
     )
 });
