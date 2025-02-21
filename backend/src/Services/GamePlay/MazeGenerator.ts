@@ -36,8 +36,8 @@ let currentVisitOrder: number = 1;
 
 //================================//
 const InitializeGrid = (width: number, height: number): void => {
-    grid = Array.from({ length: width }, () => Array(height).fill(0));
-    visitOrder = Array.from({ length: width }, () => Array(height).fill(0));
+    grid = Array.from({ length: height }, () => Array(width).fill(0));
+    visitOrder = Array.from({ length: height }, () => Array(width).fill(0));
     currentVisitOrder = 1;
 }
 
@@ -45,10 +45,12 @@ const InitializeGrid = (width: number, height: number): void => {
 const CarvePassageFrom = (currentRow: number, currentColumn: number): void => { 
     visitOrder[currentRow][currentColumn] = currentVisitOrder
     currentVisitOrder++; 
+
     // Random directions
     const directions = [N, S, E, W].sort(() => Math.random() - 0.5);
+
     directions.forEach((dir) => {
-        const nextTile: [number, number] = [currentRow + DX[dir], currentColumn + DY[dir]];
+        const nextTile: [number, number] = [currentRow + DY[dir], currentColumn + DX[dir]];
         if (IsValidTile(nextTile)) {
             if (currentRow === 0 && currentColumn === 0) {
                 console.log(dir, OPPOSITE[dir]);
@@ -75,22 +77,25 @@ const ShowMaze = (grid: number[][]): void => {
     }
 
     let mazeString = '';
-    const width = grid.length;
-    const height = grid[0].length;
+    const height = grid.length;
+    const width = grid[0].length;
 
     mazeString += width + ' ' + height + '\n';
 
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            mazeString += grid[x][y].toString().padStart(3, '0') + ' ';
+    const totalCells = width * height;
+    const padding = Math.floor(Math.log10(totalCells)) + 1;
+
+    for (let row = 0; row < height; row++) {
+        for (let column = 0; column < width; column++) {
+            mazeString += grid[row][column].toString().padStart(padding, '0') + ' ';
         }
         mazeString += '\n';
     }
 
     mazeString += '\n';
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            mazeString += visitOrder[x][y].toString().padStart(3, '0') + ' ';
+    for (let row = 0; row < height; row++) {
+        for (let column = 0; column < width; column++) {
+            mazeString += visitOrder[row][column].toString().padStart(padding, '0') + ' ';
         }
         mazeString += '\n';
     }
@@ -116,4 +121,4 @@ const GenerateRandomMaze = (width: number, height: number, verbose: boolean = fa
 }
 
 //================================//
-GenerateRandomMaze(10, 10, true);
+GenerateRandomMaze(25, 40, true);

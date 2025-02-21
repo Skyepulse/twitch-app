@@ -70,7 +70,7 @@ const MainController: React.FC = () => {
             })
             .then(setGrid)
             .catch(console.error);
-        
+    
         return () => {
             socketRef.current?.disconnect();
             socketRef.current = null;

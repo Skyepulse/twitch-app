@@ -14,13 +14,11 @@ export type MazeRef = {
 //================================//
 const Maze = forwardRef<MazeRef, MazeProps>(({ position, grid }, ref) => {
     if (!grid || grid.length === 0) {
-        console.error("Maze grid is empty, nothing to display.");
         return ( <h1>Empty Maze</h1> );
     }
 
-    const width = grid.length;
-    const height = grid[0].length;
-    
+    const height = grid.length;
+    const width = grid[0].length;    
 
     return (
         <div className="maze-wrapper">
