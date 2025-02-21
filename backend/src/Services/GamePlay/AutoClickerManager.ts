@@ -19,7 +19,6 @@ export class AutoClickerManager{
     //================================//
     public static setOrResetAutoClicker(user_id: string, frequency: number, duration: number, points: number)
     {
-        console.log("Setting AutoClicker for user: " + user_id + " with frequency: " + frequency + " duration: " + duration + " points: " + points);
         if ( this.m_instance == null ) {
             this.Init();
         }
@@ -34,7 +33,6 @@ export class AutoClickerManager{
             if (!userEntry) {
                 return;
             }
-            console.log("AutoClicker for user: " + user_id + " remaining time: " + userEntry.remainingTime);
             MyTwitchDBEndpoint.AddClick(user_id, points);
 
             userEntry.remainingTime -= frequency;

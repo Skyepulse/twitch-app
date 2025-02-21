@@ -23,6 +23,13 @@ import path from 'path';
 
 // I choose the recursive BackTracking algorithm to generate the maze
 
+//structure containing a grid, a startPosition, and endPosition
+export interface MazeInfo {
+    grid: number[][];
+    startPosition: [number, number];
+    endPosition: [number, number];
+}
+
 export class MazeGenerator{
     //===============Constants=================//
     private readonly N = 1;
@@ -115,13 +122,76 @@ export class MazeGenerator{
     }
 
     //================================//
-    public GenerateRandomMaze = (width: number, height: number, verbose: boolean = false): number[][] => {
+    public GenerateRandomMaze = (width: number, height: number, startPos: [number, number], endPos: [number, number], verbose: boolean = false): MazeInfo => {
+        if (width <= 0 || height <= 0) {
+            console.error("Invalid maze dimensions");
+            return {
+                grid: [],
+                startPosition: [0, 0],
+                endPosition: [0, 0]
+            };
+        }
+
+        if (startPos[0] < 0 || startPos[0] >= height || startPos[1] < 0 || startPos[1] >= width) {
+            console.error("Invalid start position");
+            return {
+                grid: [],
+                startPosition: [0, 0],
+                endPosition: [0, 0]
+            };
+        }
+
         this.InitializeGrid(width, height);
-        this.CarvePassageFrom(0, 0);
+        this.CarvePassageFrom(startPos[0], startPos[1]);
         if (verbose) {
             this.ShowMaze(this.grid!);
         }
-        return this.grid!;
+
+        return {
+            grid: this.grid,
+            startPosition: startPos,
+            endPosition: endPos
+        };
+    }
+
+    //================================//
+    public CanMoveLeft(cellValue: number){
+        return (cellValue & this.W) === 0;
+    }
+
+    //================================//
+    public CanMoveRight(cellValue: number){
+        return (cellValue & this.E) === 0;
+    }
+
+    //================================//
+    public CanMoveUp(cellValue: number){
+        return (cellValue & this.N) === 0;
+    }
+
+    //================================//
+    public CanMoveDown(cellValue: number){
+        return (cellValue & this.S) === 0;
+    }
+
+    //================================//
+    public MoveLeft = (position: [number, number]): [number, number] => {
+        return [position[0] + this.DY[this.W], position[1] + this.DX[this.W]];
+    }
+
+    //================================//
+    public MoveRight = (position: [number, number]): [number, number] => {
+        return [position[0] + this.DY[this.E], position[1] + this.DX[this.E]];
+    }
+
+    //================================//
+    public MoveUp = (position: [number, number]): [number, number] => {
+        return [position[0] + this.DY[this.N], position[1] + this.DX[this.N]];
+    }
+
+    //================================//
+    public MoveDown = (position: [number, number]): [number, number] => {
+        return [position[0] + this.DY[this.S], position[1] + this.DX[this.S]];
     }
 }
 
