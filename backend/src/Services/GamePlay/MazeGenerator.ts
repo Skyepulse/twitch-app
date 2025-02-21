@@ -23,102 +23,109 @@ import path from 'path';
 
 // I choose the recursive BackTracking algorithm to generate the maze
 
-//===============Constants=================//
-const N = 1, S = 2, E = 4, W = 8;
-const DX: { [key: number]: number } = { [E]: 1, [W]: -1, [N]: 0, [S]: 0 };
-const DY: { [key: number]: number } = { [E]: 0, [W]: 0, [N]: -1, [S]: 1 };
-const OPPOSITE: { [key: number]: number } = { [E]: W, [W]: E, [N]: S, [S]: N };
+export class MazeGenerator{
+    //===============Constants=================//
+    private readonly N = 1;
+    private readonly S = 2;
+    private readonly E = 4;
+    private readonly W = 8;
+    private readonly DX: { [key: number]: number } = { [this.E]: 1, [this.W]: -1, [this.N]: 0, [this.S]: 0 };
+    private readonly DY: { [key: number]: number } = { [this.E]: 0, [this.W]: 0, [this.N]: -1, [this.S]: 1 };
+    private readonly OPPOSITE: { [key: number]: number } = { [this.E]: this.W, [this.W]: this.E, [this.N]: this.S, [this.S]: this.N };
 
-//===============Members=================//
-let grid: number[][] = [];
-let visitOrder: number[][] = [];
-let currentVisitOrder: number = 1;
+    //===============Members=================//
+    private grid: number[][] = [];
+    private visitOrder: number[][] = [];
+    private currentVisitOrder: number = 1;
 
-//================================//
-const InitializeGrid = (width: number, height: number): void => {
-    grid = Array.from({ length: height }, () => Array(width).fill(0));
-    visitOrder = Array.from({ length: height }, () => Array(width).fill(0));
-    currentVisitOrder = 1;
-}
+    //================================//
+    private InitializeGrid = (width: number, height: number): void => {
+        this.grid = Array.from({ length: height }, () => Array(width).fill(0));
+        this.visitOrder = Array.from({ length: height }, () => Array(width).fill(0));
+        this.currentVisitOrder = 1;
+    }
 
-//================================//
-const CarvePassageFrom = (currentRow: number, currentColumn: number): void => { 
-    visitOrder[currentRow][currentColumn] = currentVisitOrder
-    currentVisitOrder++; 
+    //================================//
+    private CarvePassageFrom = (currentRow: number, currentColumn: number): void => { 
+        this.visitOrder[currentRow][currentColumn] = this.currentVisitOrder
+        this.currentVisitOrder++; 
 
-    // Random directions
-    const directions = [N, S, E, W].sort(() => Math.random() - 0.5);
+        // Random directions
+        const directions = [this.N, this.S, this.E, this.W].sort(() => Math.random() - 0.5);
 
-    directions.forEach((dir) => {
-        const nextTile: [number, number] = [currentRow + DY[dir], currentColumn + DX[dir]];
-        if (IsValidTile(nextTile)) {
-            if (currentRow === 0 && currentColumn === 0) {
-                console.log(dir, OPPOSITE[dir]);
+        directions.forEach((dir) => {
+            const nextTile: [number, number] = [currentRow + this.DY[dir], currentColumn + this.DX[dir]];
+            if (this.IsValidTile(nextTile)) {
+                if (currentRow === 0 && currentColumn === 0) {
+                    console.log(dir, this.OPPOSITE[dir]);
+                }
+                const [nextRow, nextColumn] = nextTile;
+                this.grid![currentRow][currentColumn] |= dir;
+                this.grid![nextRow][nextColumn] |= this.OPPOSITE[dir];
+                this.CarvePassageFrom(nextRow, nextColumn);
             }
-            const [nextRow, nextColumn] = nextTile;
-            grid![currentRow][currentColumn] |= dir;
-            grid![nextRow][nextColumn] |= OPPOSITE[dir];
-            CarvePassageFrom(nextRow, nextColumn);
-        }
-    });
-}
-
-//================================//
-const IsValidTile = ([row, column]: [number, number]): boolean => {
-    if (!grid || grid.length === 0) return false;
-    return row >= 0 && row < grid.length && column >= 0 && column < grid[0].length && grid[row][column] === 0;
-}
-
-//================================//
-const ShowMaze = (grid: number[][]): void => {
-    if (!grid || grid.length === 0) {
-        console.error("Maze grid is empty, nothing to display.");
-        return;
+        });
     }
 
-    let mazeString = '';
-    const height = grid.length;
-    const width = grid[0].length;
+    //================================//
+    private IsValidTile = ([row, column]: [number, number]): boolean => {
+        if (!this.grid || this.grid.length === 0) return false;
+        return row >= 0 && row < this.grid.length && column >= 0 && column < this.grid[0].length && this.grid[row][column] === 0;
+    }
 
-    mazeString += width + ' ' + height + '\n';
-
-    const totalCells = width * height;
-    const padding = Math.floor(Math.log10(totalCells)) + 1;
-
-    for (let row = 0; row < height; row++) {
-        for (let column = 0; column < width; column++) {
-            mazeString += grid[row][column].toString().padStart(padding, '0') + ' ';
+    //================================//
+    private ShowMaze = (grid: number[][]): void => {
+        if (!grid || grid.length === 0) {
+            console.error("Maze grid is empty, nothing to display.");
+            return;
         }
+
+        let mazeString = '';
+        const height = grid.length;
+        const width = grid[0].length;
+
+        mazeString += width + ' ' + height + '\n';
+
+        const totalCells = width * height;
+        const padding = Math.floor(Math.log10(totalCells)) + 1;
+
+        for (let row = 0; row < height; row++) {
+            for (let column = 0; column < width; column++) {
+                mazeString += grid[row][column].toString().padStart(padding, '0') + ' ';
+            }
+            mazeString += '\n';
+        }
+
         mazeString += '\n';
-    }
-
-    mazeString += '\n';
-    for (let row = 0; row < height; row++) {
-        for (let column = 0; column < width; column++) {
-            mazeString += visitOrder[row][column].toString().padStart(padding, '0') + ' ';
+        for (let row = 0; row < height; row++) {
+            for (let column = 0; column < width; column++) {
+                mazeString += this.visitOrder[row][column].toString().padStart(padding, '0') + ' ';
+            }
+            mazeString += '\n';
         }
-        mazeString += '\n';
+
+        // Save to file
+        const mazePath = path.resolve(process.cwd(), 'frontend/public/maze.txt');
+        try {
+            fs.writeFileSync(mazePath, mazeString);
+            console.log(`Maze saved to ${mazePath}`);
+        } catch (error: any) {
+            console.error(`Error saving maze: ${error.message}`);
+        }
     }
 
-    // Save to file
-    const mazePath = path.resolve(process.cwd(), 'frontend/public/maze.txt');
-    try {
-        fs.writeFileSync(mazePath, mazeString);
-        console.log(`Maze saved to ${mazePath}`);
-    } catch (error: any) {
-        console.error(`Error saving maze: ${error.message}`);
+    //================================//
+    public GenerateRandomMaze = (width: number, height: number, verbose: boolean = false): number[][] => {
+        this.InitializeGrid(width, height);
+        this.CarvePassageFrom(0, 0);
+        if (verbose) {
+            this.ShowMaze(this.grid!);
+        }
+        return this.grid!;
     }
 }
 
+//=============TEST===============//
+//const mg:MazeGenerator = new MazeGenerator();
+//mg.GenerateRandomMaze(30, 40, true);
 //================================//
-const GenerateRandomMaze = (width: number, height: number, verbose: boolean = false): number[][] => {
-    InitializeGrid(width, height);
-    CarvePassageFrom(0, 0);
-    if (verbose) {
-        ShowMaze(grid!);
-    }
-    return grid!;
-}
-
-//================================//
-GenerateRandomMaze(25, 40, true);
