@@ -13,8 +13,6 @@
     align-items: center;
     height: 100%;
     width: 100%;
-
-    background-color: aqua;
 }
 
 .click-counter-under-wrapper {
@@ -23,8 +21,6 @@
   align-items: center;
   height: 100%;
   width: 60%;
-
-  background-color: blueviolet;
 }
 
 .click-counter-wrapper-under-wrapper fit-text {

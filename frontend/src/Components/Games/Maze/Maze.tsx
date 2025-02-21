@@ -23,7 +23,8 @@ const Maze = forwardRef<MazeRef, MazeProps>(({ position, grid }, ref) => {
     
 
     return (
-        <div className= "maze-wrapper" style={{ gridTemplateColumns: `repeat(${width}, 1fr)` }}>
+        <div className="maze-wrapper">
+            <div className= "maze-under-wrapper" style={{ gridTemplateColumns: `repeat(${width}, 1fr)` }}>
             {grid.map((row, rowIndex) =>
                 row.map((cell, colIndex) => (
                     <div 
@@ -33,6 +34,7 @@ const Maze = forwardRef<MazeRef, MazeProps>(({ position, grid }, ref) => {
                 ))
             )}
         </div>
+    </div>
     )
 });
 
