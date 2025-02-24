@@ -1,9 +1,10 @@
-import { MazeGenerator, MazeInfo } from "./MazeGenerator";
+import { MazeGenerator, MazeInfo } from "./MazeGenerator.js";
 
 //================================//
 export class MazeManager {
     //================================//
     private static m_instance: MazeManager;
+    public static readonly REQUEST_MOVE_TIME: number = 5.0;
 
     //================================//    
     private mazeGenerator: MazeGenerator;
@@ -11,10 +12,16 @@ export class MazeManager {
     private currentPlayPosition: [number, number] = [0, 0];
 
     //================================//
+    private leftCount: number = 0;
+    private rightCount: number = 0;
+    private upCount: number = 0;
+    private downCount: number = 0;
+
+    //================================//
     private MazeValue(x: number, y: number): number {
         if (this.currentMazeInfo == null) return 0;
 
-        return this.currentMazeInfo.grid[y][x];
+        return this.currentMazeInfo.grid[x][y];
     }
 
     //================================//
@@ -98,10 +105,10 @@ export class MazeManager {
     }
 
     //================================//
-    public static GetMazeInfo(): MazeInfo | null {
+    public static GetMazeInfo(): { grid: number[][], start: [number, number], end: [number, number], playerPos: [number, number] } | null {
         if ( MazeManager.m_instance == null ) return null;
 
-        return MazeManager.m_instance.currentMazeInfo;
+        return { grid: MazeManager.m_instance.currentMazeInfo!.grid, start: MazeManager.m_instance.currentMazeInfo!.startPosition, end: MazeManager.m_instance.currentMazeInfo!.endPosition, playerPos: MazeManager.m_instance.currentPlayPosition };
     }
 
     //================================//
@@ -114,5 +121,97 @@ export class MazeManager {
     //================================//
     public CheckWinCondition(): boolean {
         return this.currentPlayPosition[0] === this.currentMazeInfo!.endPosition[0] && this.currentPlayPosition[1] === this.currentMazeInfo!.endPosition[1];
+    }
+
+    //================================//
+    public static HasMaze(): { b: boolean, won: boolean} {
+        if ( MazeManager.m_instance == null ) return { b: false, won: false };
+        if ( MazeManager.m_instance.currentMazeInfo == null ) return { b: false, won: false };
+
+        return { b: true, won: MazeManager.m_instance.CheckWinCondition() };
+    }
+
+    //================================//
+    public static resetValues(): void {
+        if ( MazeManager.m_instance == null ) return;
+
+        MazeManager.m_instance.leftCount = 0;
+        MazeManager.m_instance.rightCount = 0;
+        MazeManager.m_instance.upCount = 0;
+        MazeManager.m_instance.downCount = 0;
+    }
+
+    //================================//
+    public static AddLeft(): void {
+        if ( MazeManager.m_instance == null ) return;
+        if ( MazeManager.m_instance.currentMazeInfo == null ) return;
+        if ( MazeManager.m_instance.mazeGenerator.CanMoveLeft(MazeManager.m_instance.MazeValue(...MazeManager.m_instance.PlayerPosition())) ) {
+            MazeManager.m_instance.leftCount++;
+        }
+    }
+
+    //================================//
+    public static AddRight(): void {
+        if ( MazeManager.m_instance == null ) return;
+        if ( MazeManager.m_instance.currentMazeInfo == null ) return;
+        if ( MazeManager.m_instance.mazeGenerator.CanMoveRight(MazeManager.m_instance.MazeValue(...MazeManager.m_instance.PlayerPosition())) ) {
+            MazeManager.m_instance.rightCount++;
+        }
+    }
+
+    //================================//
+    public static AddUp(): void {
+        if ( MazeManager.m_instance == null ) return;
+        if ( MazeManager.m_instance.currentMazeInfo == null ) return;
+        if ( MazeManager.m_instance.mazeGenerator.CanMoveUp(MazeManager.m_instance.MazeValue(...MazeManager.m_instance.PlayerPosition())) ) {
+            MazeManager.m_instance.upCount++;
+        }
+    }
+
+    //================================//
+    public static AddDown(): void {
+        if ( MazeManager.m_instance == null ) return;
+        if ( MazeManager.m_instance.currentMazeInfo == null ) return;
+        if ( MazeManager.m_instance.mazeGenerator.CanMoveDown(MazeManager.m_instance.MazeValue(...MazeManager.m_instance.PlayerPosition())) ) {
+            MazeManager.m_instance.downCount++;
+        }
+    }
+
+    //================================//
+    public static UpdateRequests(): void {
+        if ( MazeManager.m_instance == null ) return;
+
+        const maxNum = Math.max(MazeManager.m_instance.leftCount, MazeManager.m_instance.rightCount, MazeManager.m_instance.upCount, MazeManager.m_instance.downCount);
+        if ( maxNum === 0 ) return;
+
+        //Pick the one with maximum, if multiple pick at random between them
+        const maxArray: string[] = [];
+        if ( MazeManager.m_instance.leftCount === maxNum ) maxArray.push("left");
+        if ( MazeManager.m_instance.rightCount === maxNum ) maxArray.push("right");
+        if ( MazeManager.m_instance.upCount === maxNum ) maxArray.push("up");
+        if ( MazeManager.m_instance.downCount === maxNum ) maxArray.push("down");
+
+        const randomIndex = Math.floor(Math.random() * maxArray.length);
+
+        switch (maxArray[randomIndex]) {
+            case "left":
+                MazeManager.Left();
+                console.log("Left");
+                break;
+            case "right":
+                MazeManager.Right();
+                console.log("Right");
+                break;
+            case "up":
+                MazeManager.Up();
+                console.log("Up");
+                break;
+            case "down":
+                MazeManager.Down();
+                console.log("Down");
+                break;
+        }
+
+        MazeManager.resetValues();
     }
 }

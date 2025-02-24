@@ -1,3 +1,5 @@
+import { CheckPointsData } from "../Models/Gameplay/CheckPointsData.js";
+import { MazeManager } from "./GamePlay/MazeManager.js";
 import { MyTwitchDBEndpoint } from "./MyTwitchDBEndpoint.js";
 import { SingleSocketServer } from "./SingleSocketServer.js";
 import { TwitchIRCSocket } from "./TwitchIRCSocket.js";
@@ -7,10 +9,30 @@ import chalk from "chalk";
 export class MyTwitchChat extends TwitchIRCSocket {
     private ListeningSocketServers  : SingleSocketServer[] = [];
 
+    //================================//
     private lastTopN: number = 0;
     private n_low: number = 0;
     private n_high: number = 3;
     private topN: number = 3;
+
+    private currentTotalClicks: number = 0;
+
+    //==============TIMERS==================//
+    private readonly UPDATE_INTERVAL: number = 50;
+
+    private readonly sendTotalClicksTime: number = 200;
+    private readonly sendTopNClickersTime: number = 500;
+    private readonly updateTopNClickersTime: number = 7000;
+    private readonly updateMaze: number = MazeManager.REQUEST_MOVE_TIME * 1000;
+
+    private sendTotalClicksTimer: number = 0;
+    private sendTopNClickersTimer: number = 0;
+    private updateTopNClickersTimer: number = 0;
+    private updateMazeTimer: number = MazeManager.REQUEST_MOVE_TIME * 1000;
+
+    private timeSinceLaunch: number = 0;
+    private isRunning: boolean = true;
+    private realStartTime: number = performance.now();
 
     //================================//
     constructor(_username: string, _channels: string[], _debug: boolean = false) {
@@ -25,15 +47,54 @@ export class MyTwitchChat extends TwitchIRCSocket {
             this.onReceivedTwitchMessage(_channel, _tags, _message, _self);
         });
 
-        setInterval(() => {
+        this.startUpdateLoop();
+    }
+
+    //================================//
+    private startUpdateLoop(): void {
+        const loop = () => {
+            if (!this.isRunning) return;
+
+            const now = performance.now();
+            const delta = now - this.realStartTime; // Correct calculation
+            this.realStartTime = now;
+
+            this.Update(delta);
+
+            setTimeout(loop, Math.max(0, this.UPDATE_INTERVAL - delta)); // Adjust interval to prevent drift
+        };
+
+        loop();
+    }
+
+    //================================//
+    public stopUpdateLoop(): void {
+        this.isRunning = false;
+    }
+
+    //================================//
+    public Update(delta: number): void {
+        //Send Clicks
+        if (this.sendTotalClicksTimer < this.sendTotalClicksTime) {
+            this.sendTotalClicksTimer += delta;
+        } else {
+            this.sendTotalClicksTimer = 0;
             this.SendTotalClicks();
-        }, 500);
+        }
 
-        setInterval(() => {
+        //Send TopN Clickers
+        if (this.sendTopNClickersTimer < this.sendTopNClickersTime) {
+            this.sendTopNClickersTimer += delta;
+        } else {
+            this.sendTopNClickersTimer = 0;
             this.sendTopNClickers(this.n_low, this.n_high);
-        }, 2000);
+        }
 
-        setInterval(() => {
+        //Update TopN Clickers
+        if (this.updateTopNClickersTimer < this.updateTopNClickersTime) {
+            this.updateTopNClickersTimer += delta;
+        } else {
+            this.updateTopNClickersTimer = 0;
             if (this.n_high < this.lastTopN) {
                 this.n_low += this.topN;
                 this.n_high += this.topN;
@@ -41,7 +102,38 @@ export class MyTwitchChat extends TwitchIRCSocket {
                 this.n_low = 0;
                 this.n_high = this.topN;
             }
-        }, 10000);
+        }
+
+        //Update grid and position
+        if ( CheckPointsData.HasCheckPoint( 'Maze', this.currentTotalClicks ))
+        {
+            if (this.updateMazeTimer < this.updateMaze) {
+                this.updateMazeTimer += delta;
+            } else {
+                this.updateMazeTimer = 0;
+                MazeManager.UpdateRequests();
+
+                const { b, won } = MazeManager.HasMaze();
+                if (!b){
+                    MazeManager.ResetMaze(31, 30);
+                }
+                else
+                {
+                    this.sendGridAndPosition( won );
+                }
+            }
+        }
+
+        //Update Maze
+        
+
+        /*  //Update Time Since Launch
+        this.timeSinceLaunch += delta;
+
+        console.log(
+            `Time since launch (internal): ${this.timeSinceLaunch.toFixed(2)}ms | delta: ${delta.toFixed(2)}ms`
+        );
+        */
     }
 
     //================================//
@@ -74,9 +166,21 @@ export class MyTwitchChat extends TwitchIRCSocket {
                 this.ListeningSocketServers.forEach(server => {
                     server.SendMessage('total-clicks', { totalClicks: result });
                 });
+                this.currentTotalClicks = result;
             }
         });
     }   
+
+    //================================//
+    private sendGridAndPosition(win: boolean): void {
+        const mazeInfo = MazeManager.GetMazeInfo();
+        if (mazeInfo) {
+            const { grid, start, end, playerPos } = mazeInfo;
+            this.ListeningSocketServers.forEach(server => {
+                server.SendMessage('maze-data', { grid: grid, position: playerPos, win: win});
+            });
+        }
+    }
 
     //================================//
     private sendTopNClickers(n_low: number, n_high: number): void {
@@ -203,8 +307,29 @@ export class MyTwitchChat extends TwitchIRCSocket {
                     });
                 }
                 break;
+            case '!up':
+                if (MazeManager.HasMaze().b) {
+                    MazeManager.AddUp();
+                    break;
+                }
+            case '!down':
+                if (MazeManager.HasMaze().b) {
+                    MazeManager.AddDown();
+                    break;
+                }
+            case '!right':
+                if (MazeManager.HasMaze().b) {
+                    MazeManager.AddRight();
+                    break;
+                }
+            case '!left':
+                if (MazeManager.HasMaze().b) {
+                    MazeManager.AddLeft();
+                    break;
+                }
             case '!help':
-                this.SendChatMessage(_channel, `Available commands: !ping, !hello, !register, !click, !myClicks, !unregister, !upgrade, !help`);
+                const directions = MazeManager.HasMaze().b ? 'Use !up, !down, !right and !left if you can participate in the maze.' : '';
+                this.SendChatMessage(_channel, `Available commands: !ping, !hello, !register, !click, !myClicks, !unregister, !upgrade, !help.` + directions);
                 break;
             default:
                 this.SendChatMessage(_channel, `The command ${_message} does not exist. Use !help to see the available commands.`);

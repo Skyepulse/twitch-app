@@ -1,4 +1,4 @@
-import { useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
+import { useEffect, forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import './ClickCounter.css';
 import { GetFixedNumber } from '../../Utilities/MathUtilities';
 
@@ -14,11 +14,13 @@ interface ClickCounterProps {
 
 export type ClickCounterRef = {
     updateScore: () => void;
+    forceRender: (length: number) => void;
 };
 
 //================================//
 const ClickCounter = forwardRef<ClickCounterRef, ClickCounterProps>(({ clicks }, ref) => {
     const scoreRef = useRef<HTMLHeadingElement>(null);
+    const [renderKey, setRenderKey] = useState(0);
 
     //------------References-------------//
     useImperativeHandle(ref, () => ({
@@ -38,6 +40,16 @@ const ClickCounter = forwardRef<ClickCounterRef, ClickCounterProps>(({ clicks },
 
             score.style.animation = 'score-pop 0.5s';
         },
+
+        //Only render when grid is toggled in and out of the DOM
+        forceRender: ( length: number) => {
+            if (!scoreRef.current) return;
+
+            if ( length > 0 && renderKey === 0 )
+                setRenderKey(1);
+            else if (length === 0 && renderKey === 1)
+                setRenderKey(0);
+        }
     }));
 
     //------------Effects-------------//
@@ -54,7 +66,7 @@ const ClickCounter = forwardRef<ClickCounterRef, ClickCounterProps>(({ clicks },
       }, []);
 
     return (
-    <div className="click-counter-wrapper">
+    <div className="click-counter-wrapper" key={renderKey}>
         <div className="click-counter-under-wrapper">
             {clicks.toString().length >= 3 ? (
                 <fit-text>

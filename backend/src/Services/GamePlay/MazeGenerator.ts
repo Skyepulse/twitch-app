@@ -63,9 +63,6 @@ export class MazeGenerator{
         directions.forEach((dir) => {
             const nextTile: [number, number] = [currentRow + this.DY[dir], currentColumn + this.DX[dir]];
             if (this.IsValidTile(nextTile)) {
-                if (currentRow === 0 && currentColumn === 0) {
-                    console.log(dir, this.OPPOSITE[dir]);
-                }
                 const [nextRow, nextColumn] = nextTile;
                 this.grid![currentRow][currentColumn] |= dir;
                 this.grid![nextRow][nextColumn] |= this.OPPOSITE[dir];
@@ -112,7 +109,7 @@ export class MazeGenerator{
         }
 
         // Save to file
-        const mazePath = path.resolve(process.cwd(), 'frontend/public/maze.txt');
+        const mazePath = path.resolve(process.cwd(), '../frontend/public/maze.txt');
         try {
             fs.writeFileSync(mazePath, mazeString);
             console.log(`Maze saved to ${mazePath}`);
@@ -156,22 +153,22 @@ export class MazeGenerator{
 
     //================================//
     public CanMoveLeft(cellValue: number){
-        return (cellValue & this.W) === 0;
+        return (cellValue & this.W) !== 0;
     }
 
     //================================//
     public CanMoveRight(cellValue: number){
-        return (cellValue & this.E) === 0;
+        return (cellValue & this.E) !== 0;
     }
 
     //================================//
     public CanMoveUp(cellValue: number){
-        return (cellValue & this.N) === 0;
+        return (cellValue & this.N) !== 0;
     }
 
     //================================//
     public CanMoveDown(cellValue: number){
-        return (cellValue & this.S) === 0;
+        return (cellValue & this.S) !== 0;
     }
 
     //================================//

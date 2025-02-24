@@ -1,0 +1,14 @@
+{
+    "checkPoints": [
+        {
+            "id": 1,
+            "name": "Maze",
+            "cap": 555
+        },
+        {
+            "id": 2,
+            "name": "UNKNOWN",
+            "cap": 30000
+        }
+   ]
+}

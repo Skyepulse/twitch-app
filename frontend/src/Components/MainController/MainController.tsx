@@ -14,11 +14,17 @@ const MainController: React.FC = () => {
     //------------Members-------------//
     const socketRef = useRef<SocketIOClient.Socket | null>(null);
     const [messages, setMessages] = useState<{ username: string, message: string, channel: string }[]>([]);
+    
+    //================================//
     const [clicks, setClicks] = useState<number>(0);
     const [topClickers, setTopClickers] = useState<{ position: number, user_id: number, username: string, click_count: number }[]>([]);
     const middleContainerRef = useRef<HTMLDivElement>(null);
     const clickCounterRef = useRef<ClickCounterRef>(null);
+
+    //================================//
     const [grid, setGrid] = useState<number[][]>([]);
+    const [playerPos, setPos] = useState<[number, number]>([0, 0]);
+    const [mazeWin, setMazeWin] = useState<boolean>(false);
 
     //------------UseEffects-------------//
     useEffect(() => {
@@ -61,15 +67,6 @@ const MainController: React.FC = () => {
                 setTopClickers(data.topClickers);
             });
         }
-
-        fetch('/maze.txt')
-            .then(res => res.text())
-            .then(text => {
-                const file = new File([text], 'maze.txt');
-                return GetGridFromFile(file);
-            })
-            .then(setGrid)
-            .catch(console.error);
     
         return () => {
             socketRef.current?.disconnect();
@@ -77,6 +74,7 @@ const MainController: React.FC = () => {
         };
     }, []);
 
+    //---------Click Animation---------//
     useEffect(() => {
         if (!socketRef.current) return;
 
@@ -98,6 +96,25 @@ const MainController: React.FC = () => {
         };
     }, [clicks]);
 
+    //---------Maze Generation---------//
+    useEffect(() => {
+        if (!socketRef.current) return;
+        
+        const handleMazeData = (data: { grid: number[][], position: [number, number], win: boolean }) => {
+            setGrid(data.grid);
+            setPos(data.position);
+            setMazeWin(data.win);
+        };
+
+        clickCounterRef.current?.forceRender(grid.length);
+
+        socketRef.current.on('maze-data', handleMazeData);
+
+        return () => {
+            socketRef.current?.off('maze-data', handleMazeData);
+        };
+    }, [grid, playerPos, mazeWin]);
+
     //------------Structure-------------//
     return (
         <div className="main-controller-wrapper">
@@ -106,7 +123,9 @@ const MainController: React.FC = () => {
             </div>
             <div ref={middleContainerRef} className="main-controller-body">
                 <ClickCounter ref={clickCounterRef} clicks = {clicks}/>
-                <Maze ref={null} position = {[0, 0]} grid = {grid}/>
+                {grid.length > 0 && (
+                    <Maze grid={grid} position={playerPos} ref={null}/>
+                )}
             </div>
             <div className="main-controller-footer">
                 <Chat messages = {messages}/>
@@ -168,6 +187,5 @@ const GetGridFromFile = async (file: File): Promise<number[][]> => {
         reader.onerror = (error) => reject(error);
     });
 };
-
 
 export default MainController;

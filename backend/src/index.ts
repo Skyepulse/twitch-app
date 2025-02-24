@@ -6,18 +6,25 @@ import { MyTwitchDBEndpoint } from './Services/MyTwitchDBEndpoint.js';
 import { MyTokenManager } from './Services/MyTokenManager.js';
 
 import { BuyableBonusData } from './Models/Gameplay/BuyableBonusData.js';
+import { CheckPointsData } from './Models/Gameplay/CheckPointsData.js';
 
 //------------Members-------------//
 const PORT = process.env.PORT || '5000';
 const MyApp: BaseExpressApp = new BaseExpressApp(PORT);
 const SocketServer: MyServer = new MyServer(MyApp.server, "*");
 
+//================================//
 const TwitchClient: MyTwitchChat = new MyTwitchChat(process.env.TWITCH_USERNAME!, [process.env.TWITCH_CHANNEL!], false);
 
+//================================//
 function Init(): void {
     TwitchClient.addListenerServer(SocketServer);
-    BuyableBonusData.initialize('./src/Config/Bonuses.json');
 
+    //================================//
+    BuyableBonusData.initialize('./src/Config/Bonuses.json');
+    CheckPointsData.initialize('./src/Config/CheckPoints.json');
+
+    //================================//
     MyTwitchDBEndpoint.Init(process.env.DB_USER!, process.env.DB_HOST!, process.env.DB_NAME!, process.env.DB_PASSWORD!, parseInt(process.env.DB_PORT || '5432'));
     MyTokenManager.Init(process.env.DB_USER!, process.env.DB_HOST!, process.env.DB_NAME!, process.env.DB_PASSWORD!, parseInt(process.env.DB_PORT!)).then((result: boolean) => {
         if (result) {
@@ -26,4 +33,5 @@ function Init(): void {
     });
 }
 
+//================================//
 Init();
