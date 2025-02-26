@@ -12,6 +12,8 @@ export class MyServer extends SingleSocketServer{
         }
 
         client.emit(_event, _data);
+        this.m_numberOfOutgoingMessages++;
+        this.m_totalOutgoingSize += Buffer.byteLength(JSON.stringify(_data));
     }
 
     //================================//

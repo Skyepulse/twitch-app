@@ -210,6 +210,10 @@ export class MyTwitchChat extends TwitchIRCSocket {
     public SendChatMessage(_channel: string, _message: string): void {
         try {
             this.getTwitchClient().say(_channel, _message);
+
+            this.m_numberOfOutgoingMessages++;
+            this.m_totalOutgoingSize += Buffer.byteLength(_message, 'utf8');
+            
         } catch (error: any) {
             console.error(chalk.red('Error sending message: ', error));
         }
@@ -217,6 +221,9 @@ export class MyTwitchChat extends TwitchIRCSocket {
 
     //================================//
     protected onReceivedTwitchMessage(_channel: string, _tags: any, _message: string, _self: boolean): void {
+        this.m_numberOfIncomingMessages++;
+        this.m_totalIncomingSize += Buffer.byteLength(_message, 'utf8');
+        
         if (_self) return;
         
         this.ListeningSocketServers.forEach(server => {

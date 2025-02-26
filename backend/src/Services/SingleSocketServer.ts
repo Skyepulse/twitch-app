@@ -6,6 +6,12 @@ export abstract class SingleSocketServer {
     private m_singleClient: Socket | null = null;
 
     //================================//
+    protected m_numberOfIncomingMessages: number = 0;
+    protected m_numberOfOutgoingMessages: number = 0;
+    protected m_totalIncomingSize: number = 0.0;
+    protected m_totalOutgoingSize: number = 0.0;
+
+    //================================//
     constructor(_server: any, _origin: string) {
         console.log("🚀 Initializing WebSocket Server...");
         this.m_io = new Server(_server,
@@ -50,4 +56,9 @@ export abstract class SingleSocketServer {
 
     //================================//
     abstract SendMessage(_event: string, _data: any): void;
+
+    //================================//
+    public getUsageInformation(): string {
+        return `Fom single socket server, Incoming messages: ${this.m_numberOfIncomingMessages}, Outgoing messages: ${this.m_numberOfOutgoingMessages}, Incoming size: ${this.m_totalIncomingSize}, Outgoing size: ${this.m_totalOutgoingSize}`;
+    }
 }

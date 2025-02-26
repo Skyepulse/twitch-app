@@ -6,6 +6,10 @@ export class DatabaseConnectionEndpoint {
     private m_pool: pkg.Pool;
 
     //================================//
+    protected m_dbIncomingByes: number = 0.0;
+    protected m_dbOutgoingBytes: number = 0.0;
+
+    //================================//
     constructor(_user: string, _host: string, _database: string, _password: string, _port: number) {
         if ( _host === 'localhost' ) 
         {
@@ -31,8 +35,26 @@ export class DatabaseConnectionEndpoint {
     }
 
     //================================//
-    protected async queryDatabase(_query: string): Promise<any> {
-        const result = await this.m_pool.query(_query);
-        return result;
+    protected async queryDatabase(_query: string, _params: any[] = []): Promise<any> {
+        try{
+            const querySize = Buffer.byteLength(_query, 'utf8');
+            const paramSize = _params.reduce((acc, param) => acc + Buffer.byteLength(String(param), 'utf8'), 0);
+            this.m_dbIncomingByes += querySize + paramSize;
+
+            const result = await this.m_pool.query(_query);
+
+            const responseSize = Buffer.byteLength(JSON.stringify(result.rows), 'utf8'); 
+            this.m_dbOutgoingBytes += responseSize;
+
+            return result;
+        } catch( error ){
+            console.error('Error executing a database query:', error);
+            return null;
+        }
+    }
+
+    //================================//
+    public getUsageInformation(): string {
+        return `Database Incoming Bytes: ${this.m_dbIncomingByes} | Database Outgoing Bytes: ${this.m_dbOutgoingBytes}`;
     }
 }

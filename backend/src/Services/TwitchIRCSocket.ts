@@ -4,10 +4,18 @@ import { MyTokenManager } from './MyTokenManager.js';
 
 //================================//
 export class TwitchIRCSocket {
+
+    //================================//
     protected m_twitchClient: tmi.Client;
     protected m_username: string;
     protected m_channels: string[];
     protected m_debug: boolean;
+
+    //================================//
+    protected m_numberOfIncomingMessages: number = 0;
+    protected m_numberOfOutgoingMessages: number = 0;
+    protected m_totalIncomingSize: number = 0.0;
+    protected m_totalOutgoingSize: number = 0.0;
 
     //================================//
     constructor( _username: string, _channels: string[], _debug: boolean = false) {
@@ -68,5 +76,14 @@ export class TwitchIRCSocket {
             .catch((error: any) => {
                 console.error(chalk.red('Error connecting to Twitch: ', error));
             });
+    }
+
+    //================================//
+    public getUsageInformation(): string {
+        //transform bytes to MB
+        const totalincomingMB: number = this.m_totalIncomingSize / 1024.0 / 1024.0;
+        const totaloutgoingMB: number = this.m_totalOutgoingSize / 1024.0 / 1024.0;
+
+        return `Incoming Messages: ${this.m_numberOfIncomingMessages} with size ${this.m_totalIncomingSize}MB | Outgoing Messages: ${this.m_numberOfOutgoingMessages} with size ${this.m_totalOutgoingSize}MB`;
     }
 }
