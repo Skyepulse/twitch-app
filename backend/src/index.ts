@@ -7,6 +7,7 @@ import { MyTokenManager } from './Services/MyTokenManager.js';
 
 import { BuyableBonusData } from './Models/Gameplay/BuyableBonusData.js';
 import { CheckPointsData } from './Models/Gameplay/CheckPointsData.js';
+import NetworkUsageInterface from './Middlewares/NetworkUsageInterface.js';
 
 //------------Members-------------//
 const PORT = process.env.PORT || '5000';
@@ -31,6 +32,10 @@ function Init(): void {
             TwitchClient.initializeConnection();
         }
     });
+
+    (async () => {
+        await NetworkUsageInterface.Init([TwitchClient], [SocketServer], [MyTwitchDBEndpoint.instance]);
+    })();
 }
 
 //================================//

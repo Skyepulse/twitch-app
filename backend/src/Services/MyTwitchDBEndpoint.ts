@@ -8,7 +8,7 @@ import { console } from "inspector";
 
 //================================//
 export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
-    private static instance: MyTwitchDBEndpoint;
+    public static instance: MyTwitchDBEndpoint;
 
     //================================//
     private constructor(user: string, _host: string, _database: string, _password: string, _port: number) {
