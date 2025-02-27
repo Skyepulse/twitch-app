@@ -91,6 +91,7 @@ export class MyTwitchChat extends TwitchIRCSocket {
                 const { b, won } = MazeManager.HasMaze();
                 if (!b){
                     MazeManager.ResetMaze(31, 30);
+                    this.B_refreshMaze = true;
                 }
             }
         }

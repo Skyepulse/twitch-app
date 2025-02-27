@@ -13,24 +13,6 @@ export type MazeRef = {
 
 //================================//
 const Maze = forwardRef<MazeRef, MazeProps>(({ position, grid }, ref) => {
-    
-    const [timeLeft, setTimeLeft] = useState(5.0);
-    const intervalRef = useRef<NodeJS.Timeout | null>(null);
-    
-    //timer
-    useEffect(() => {
-        setTimeLeft(5.0);
-
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-        }
-
-        intervalRef.current = setInterval(() => {
-            setTimeLeft(prev => Math.max(0, (prev - 0.01)));
-        }, 10);
-
-        return () => clearInterval(intervalRef.current!);
-    }, [grid]);
 
     if (!grid || grid.length === 0) {
         return ( <h1>Empty Maze</h1> );
@@ -44,10 +26,6 @@ const Maze = forwardRef<MazeRef, MazeProps>(({ position, grid }, ref) => {
     
     return (
         <div className="maze-wrapper">
-            {/* Timer Display */}
-            <div className="timer">
-                Next Update: <span>{timeLeft.toFixed(2)}s</span>
-            </div>
             <div className= "maze-under-wrapper" style={{ gridTemplateColumns: `repeat(${width}, 1fr)` }}>
             {grid.map((row, rowIndex) =>
                 row.map((cell, colIndex) => (
