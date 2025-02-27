@@ -2,6 +2,7 @@ import os from "os";
 import { TwitchIRCSocket } from "../Services/TwitchIRCSocket";
 import { SingleSocketServer } from "../Services/SingleSocketServer";
 import { DatabaseConnectionEndpoint } from "../Services/DatabaseConnectionEndpoint";
+import chalk from "chalk";
 
 //================================//    
 interface NetworkStats {
@@ -62,7 +63,9 @@ export default class NetworkUsageInterface {
                     string += await endpoint.getUsageInformation() + ' | ';
                 }
 
-                console.log(`Total Bandwidth - Sent: ${totalBytesSent} bytes, Received: ${totalBytesReceived} bytes | ${string}`);
+                const MBsent = (totalBytesSent / 1024 / 1024).toFixed(3);
+                const MBreceived = (totalBytesReceived / 1024 / 1024).toFixed(3);
+                console.log(chalk.yellowBright(`Total Bandwidth - Sent: ${MBsent} MB, Received: ${MBreceived} MB | ${string}`));
             }
         };
 

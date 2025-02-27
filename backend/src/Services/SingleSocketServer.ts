@@ -1,4 +1,5 @@
 import { Server, Socket } from '../../node_modules/socket.io/dist/index.js';
+import EventSystem from '../Middlewares/EventSystem.js';
 
 //================================//
 export abstract class SingleSocketServer {
@@ -43,6 +44,7 @@ export abstract class SingleSocketServer {
 
         this.m_singleClient = socket;
         this.m_singleClient.send('You are connected.');
+        EventSystem.Emit('new-client-connected', {});
 
         socket.on('disconnect', () => {
             this.m_singleClient = null;
@@ -59,6 +61,13 @@ export abstract class SingleSocketServer {
 
     //================================//
     public getUsageInformation(): string {
-        return `Fom single socket server, Incoming messages: ${this.m_numberOfIncomingMessages}, Outgoing messages: ${this.m_numberOfOutgoingMessages}, Incoming size: ${this.m_totalIncomingSize}, Outgoing size: ${this.m_totalOutgoingSize}`;
+        const MBIncoming = (this.m_totalIncomingSize / 1024 / 1024).toFixed(3);
+        const MBOutgoing = (this.m_totalOutgoingSize / 1024 / 1024).toFixed(3);
+        return `Fom single socket server, Incoming messages: ${this.m_numberOfIncomingMessages}, Outgoing messages: ${this.m_numberOfOutgoingMessages}, Incoming size: ${MBIncoming} MB, Outgoing size: ${MBOutgoing} MB`;
+    }
+
+    //================================//
+    public AmIConnected(): boolean {
+        return this.m_singleClient !== null;
     }
 }

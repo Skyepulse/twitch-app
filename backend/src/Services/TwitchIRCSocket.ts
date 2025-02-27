@@ -81,9 +81,9 @@ export class TwitchIRCSocket {
     //================================//
     public getUsageInformation(): string {
         //transform bytes to MB
-        const totalincomingMB: number = this.m_totalIncomingSize / 1024.0 / 1024.0;
-        const totaloutgoingMB: number = this.m_totalOutgoingSize / 1024.0 / 1024.0;
+        const totalincomingMB = (this.m_totalIncomingSize / 1024.0 / 1024.0).toFixed(3);
+        const totaloutgoingMB = (this.m_totalOutgoingSize / 1024.0 / 1024.0).toFixed(3);
 
-        return `Incoming Messages: ${this.m_numberOfIncomingMessages} with size ${this.m_totalIncomingSize}MB | Outgoing Messages: ${this.m_numberOfOutgoingMessages} with size ${this.m_totalOutgoingSize}MB`;
+        return `Twitch Incoming Messages: ${this.m_numberOfIncomingMessages} with size ${totalincomingMB} MB | Twitch Outgoing Messages: ${this.m_numberOfOutgoingMessages} with size ${totaloutgoingMB} MB`;
     }
 }

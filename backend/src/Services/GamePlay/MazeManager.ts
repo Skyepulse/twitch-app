@@ -178,11 +178,11 @@ export class MazeManager {
     }
 
     //================================//
-    public static UpdateRequests(): void {
-        if ( MazeManager.m_instance == null ) return;
+    public static UpdateRequests(): boolean {
+        if ( MazeManager.m_instance == null ) return false;
 
         const maxNum = Math.max(MazeManager.m_instance.leftCount, MazeManager.m_instance.rightCount, MazeManager.m_instance.upCount, MazeManager.m_instance.downCount);
-        if ( maxNum === 0 ) return;
+        if ( maxNum === 0 ) return false;
 
         //Pick the one with maximum, if multiple pick at random between them
         const maxArray: string[] = [];
@@ -213,5 +213,7 @@ export class MazeManager {
         }
 
         MazeManager.resetValues();
+
+        return true;
     }
 }

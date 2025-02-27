@@ -55,6 +55,8 @@ export class DatabaseConnectionEndpoint {
 
     //================================//
     public getUsageInformation(): string {
-        return `Database Incoming Bytes: ${this.m_dbIncomingByes} | Database Outgoing Bytes: ${this.m_dbOutgoingBytes}`;
+        const MBIncoming = (this.m_dbIncomingByes / 1024 / 1024).toFixed(3);
+        const MBOutgoing = (this.m_dbOutgoingBytes / 1024 / 1024).toFixed(3);
+        return `Database Incoming: ${MBIncoming} MB | Database Outgoing : ${MBOutgoing} MB`;
     }
 }

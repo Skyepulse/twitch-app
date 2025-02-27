@@ -5,6 +5,7 @@ import { BuyableBonusData } from "../Models/Gameplay/BuyableBonusData.js";
 import { AutoClickerManager } from "./GamePlay/AutoClickerManager.js";
 import { IT_AutoClicker } from "../Interfaces/GameplayObjects/AutoClickers.js";
 import { console } from "inspector";
+import EventSystem from "../Middlewares/EventSystem.js";
 
 //================================//
 export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
@@ -109,7 +110,7 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
 
     //================================//
     private async getTopNClickers(): Promise<FullUserInfo[]> {
-        const query = `SELECT user_id, username, click_count FROM base_clicks WHERE user_id != 1 ORDER BY click_count DESC;`;
+        const query = `SELECT user_id, username, click_count FROM base_clicks WHERE user_id != 1 ORDER BY click_count DESC LIMIT 20;`;
         try {
             const result = await this.queryDatabase(query);
             if (result.rows.length === 0) {
@@ -368,6 +369,7 @@ export class MyTwitchDBEndpoint extends DatabaseConnectionEndpoint {
 
             const result = await MyTwitchDBEndpoint.instance.addClicks(_id, _clicks);
             if (result) {
+                EventSystem.Emit('click-added', {});
                 return 1;
             } else {
                 return -1;
