@@ -124,7 +124,7 @@ const MainController: React.FC = () => {
             <div ref={middleContainerRef} className="main-controller-body">
                 <ClickCounter ref={clickCounterRef} clicks = {clicks}/>
                 {grid.length > 0 && (
-                    <Maze grid={grid} position={playerPos} ref={null}/>
+                    <Maze grid={grid} position={playerPos} win={mazeWin} ref={null}/>
                 )}
             </div>
             <div className="main-controller-footer">
@@ -154,6 +154,7 @@ const AnimateClick = (container: HTMLElement | null, clicks: number) => {
 };
 
 //================================//
+/*
 const GetGridFromFile = async (file: File): Promise<number[][]> => {
     const reader = new FileReader();
     reader.readAsText(file);
@@ -187,5 +188,6 @@ const GetGridFromFile = async (file: File): Promise<number[][]> => {
         reader.onerror = (error) => reject(error);
     });
 };
+*/
 
 export default MainController;

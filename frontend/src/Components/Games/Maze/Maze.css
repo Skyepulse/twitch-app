@@ -38,3 +38,8 @@
 .border-right {
     border-right-color: black;
 }
+
+.maze-text {
+    font-size: 1.5em;
+    font-weight: bold;
+}

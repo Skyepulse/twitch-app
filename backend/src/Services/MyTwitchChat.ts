@@ -19,6 +19,9 @@ export class MyTwitchChat extends TwitchIRCSocket {
     private readonly updateMaze: number = MazeManager.REQUEST_MOVE_TIME * 1000;
     private updateMazeTimer: number = MazeManager.REQUEST_MOVE_TIME * 1000;
 
+    private readonly mazeResetRefreshTime: number = 1000 * 15; // 15 Seconds
+    private mazeResetTimer: number = 0;
+
     private B_refreshClicks: boolean = false;
     private B_refreshMaze: boolean = false;
 
@@ -78,20 +81,35 @@ export class MyTwitchChat extends TwitchIRCSocket {
         //Update grid and position
         if ( CheckPointsData.HasCheckPoint( 'Maze', this.currentTotalClicks ))
         {
-            if (this.updateMazeTimer < this.updateMaze) {
-                this.updateMazeTimer += delta;
-            } else {
-                this.updateMazeTimer = 0;
-                const hadUpdate = MazeManager.UpdateRequests();
-
-                if (hadUpdate) {
+            if ( this.mazeResetTimer > 0 )
+            {
+                this.mazeResetTimer -= delta;
+                if (this.mazeResetTimer <= 0)
+                {
+                    this.updateMazeTimer = this.updateMaze;
+                    MazeManager.ResetMaze(5, 4);
                     this.B_refreshMaze = true;
                 }
-
-                const { b, won } = MazeManager.HasMaze();
-                if (!b){
-                    MazeManager.ResetMaze(31, 30);
-                    this.B_refreshMaze = true;
+            } 
+            else 
+            {
+                if (this.updateMazeTimer < this.updateMaze) {
+                    this.updateMazeTimer += delta;
+                } else {
+                    this.updateMazeTimer = 0;
+                    const hadUpdate = MazeManager.UpdateRequests();
+    
+                    if (hadUpdate) {
+                        this.B_refreshMaze = true;
+                    }
+    
+                    const { b, won } = MazeManager.HasMaze();
+                    if (!b){
+                        MazeManager.ResetMaze(5, 4);
+                        this.B_refreshMaze = true;
+                    } else if (won) {
+                        this.mazeResetTimer = this.mazeResetRefreshTime;
+                    }
                 }
             }
         }
@@ -160,7 +178,6 @@ export class MyTwitchChat extends TwitchIRCSocket {
                     server.SendMessage('total-clicks', { totalClicks: result });
                 });
                 this.currentTotalClicks = result;
-                console.log(chalk.cyanBright('Total clicks sent!'));
             }
         });
     }   
@@ -176,7 +193,6 @@ export class MyTwitchChat extends TwitchIRCSocket {
             this.ListeningSocketServers.forEach(server => {
                 server.SendMessage('maze-data', { grid: grid, position: playerPos, win: win});
             });
-            console.log(chalk.cyanBright('MazeInfoSent!'));
         }
     }
 

@@ -5,6 +5,7 @@ import './Maze.css';
 interface MazeProps {
     position: [number, number];
     grid: number[][];
+    win: boolean;
 }
 
 export type MazeRef = {
@@ -12,7 +13,7 @@ export type MazeRef = {
 };
 
 //================================//
-const Maze = forwardRef<MazeRef, MazeProps>(({ position, grid }, ref) => {
+const Maze = forwardRef<MazeRef, MazeProps>(({ position, grid, win }, ref) => {
 
     if (!grid || grid.length === 0) {
         return ( <h1>Empty Maze</h1> );
@@ -26,6 +27,9 @@ const Maze = forwardRef<MazeRef, MazeProps>(({ position, grid }, ref) => {
     
     return (
         <div className="maze-wrapper">
+            <div className="maze-text" style={{ color: win ? 'green' : 'black' }}>
+                {win ? 'You Win! Standby for new Maze Generation.' : 'Find the exit!'}
+            </div>
             <div className= "maze-under-wrapper" style={{ gridTemplateColumns: `repeat(${width}, 1fr)` }}>
             {grid.map((row, rowIndex) =>
                 row.map((cell, colIndex) => (

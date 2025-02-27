@@ -52,7 +52,7 @@ export class MazeManager {
             MazeManager.Init();
         }
 
-        MazeManager.m_instance.currentMazeInfo = this.m_instance.GenerateRandomMaze(width, height, [0, 0], [width-1, height-1]);
+        MazeManager.m_instance.currentMazeInfo = this.m_instance.GenerateRandomMaze(width, height, [0, 0], [height-1, width-1]);
         MazeManager.m_instance.currentPlayPosition = [0, 0];
     }
 
@@ -196,19 +196,15 @@ export class MazeManager {
         switch (maxArray[randomIndex]) {
             case "left":
                 MazeManager.Left();
-                console.log("Left");
                 break;
             case "right":
                 MazeManager.Right();
-                console.log("Right");
                 break;
             case "up":
                 MazeManager.Up();
-                console.log("Up");
                 break;
             case "down":
                 MazeManager.Down();
-                console.log("Down");
                 break;
         }
 
