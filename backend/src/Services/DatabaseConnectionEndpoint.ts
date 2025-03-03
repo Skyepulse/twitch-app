@@ -15,7 +15,7 @@ export class DatabaseConnectionEndpoint {
         {
             //If there is no password, console log that it is a connection without a password
             if (!_password) {
-                console.log('Connecting to database without a password');
+                console.log('Connecting to database without a password for user ' + _user);
             }
             
             this.m_pool = new Pool({
