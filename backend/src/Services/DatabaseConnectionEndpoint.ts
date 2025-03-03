@@ -13,6 +13,11 @@ export class DatabaseConnectionEndpoint {
     constructor(_user: string, _host: string, _database: string, _password: string, _port: number) {
         if ( _host === 'localhost' ) 
         {
+            //If there is no password, console log that it is a connection without a password
+            if (!_password) {
+                console.log('Connecting to database without a password');
+            }
+            
             this.m_pool = new Pool({
                 user: _user,
                 host: _host,
