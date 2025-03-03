@@ -17,8 +17,8 @@ export class DatabaseConnectionEndpoint {
                 user: _user,
                 host: _host,
                 database: _database,
-                password: _password,
                 port: _port,
+                ...( _password ? { password: _password } : {} )
             });
         }
         else 
