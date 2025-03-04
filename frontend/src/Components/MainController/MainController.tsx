@@ -28,7 +28,7 @@ const MainController: React.FC = () => {
 
     //------------UseEffects-------------//
     useEffect(() => {
-        const url = ('ws://' + process.env.REACT_APP_BACKEND_LB + ":" + process.env.REACT_APP_BACKEND_PORT) || 'https://localhost:5000';
+        const url = ('ws://' + process.env.REACT_APP_BACKEND_LB + ":" + process.env.REACT_APP_BACKEND_PORT) || '/socket.io/';
         console.log("Connecting to:", url);
 
         if (!socketRef.current) {
