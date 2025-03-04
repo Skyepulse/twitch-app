@@ -1,24 +1,54 @@
 import { io } from "socket.io-client";
-import dotenv from 'dotenv';
-dotenv.config({ path: process.env.ENV_PATH || '.env' });
+import dotenv from "dotenv";
 
-const SOCKET_URL = "ws://" + process.env.REACT_APP_BACKEND_LB + ":" + process.env.REACT_APP_BACKEND_PORT;
-console.log("🚀 ~ file: websocketTester.js ~ line 4 ~ SOCKET_URL", SOCKET_URL);
-const socket = io(SOCKET_URL);
+dotenv.config({ path: process.env.ENV_PATH || ".env" });
 
+// Determine WebSocket URL
+const SOCKET_URL =
+  process.env.REACT_APP_BACKEND_LB === "localhost"
+    ? `ws://${process.env.REACT_APP_BACKEND_LB}:${process.env.REACT_APP_BACKEND_PORT}`
+    : `${process.env.REACT_APP_BACKEND_PROTOCOL || "wss"}://${process.env.REACT_APP_BACKEND_HOST || "localhost"}:${process.env.REACT_APP_BACKEND_PORT || 8080}/socket.io/`;
+
+console.log("🚀 Connecting to WebSocket:", SOCKET_URL);
+
+// Initialize Socket.IO client
+const socket = io(SOCKET_URL, {
+  transports: ["websocket", "polling"], // Ensure fallback transport options
+  reconnectionAttempts: 5, // Retry 5 times before failing
+  timeout: 5000, // 5 seconds timeout
+  secure: SOCKET_URL.startsWith("wss"), // Automatically detect if secure
+});
+
+// Handle successful connection
 socket.on("connect", () => {
-    console.log("✅ Socket.IO connected!");
-    socket.send("Hello Server!");
+  console.log("✅ Socket.IO connected!");
+  socket.send("Hello Server!");
 });
 
+// Handle incoming messages
 socket.on("message", (data) => {
-    console.log("📩 Message from server:", data);
+  console.log("📩 Message from server:", data);
 });
 
+// Handle connection errors
 socket.on("connect_error", (err) => {
-    console.error("❌ Socket.IO Error:", err.message);
+  console.error("❌ Socket.IO Error:", err.message);
 });
 
+// Handle disconnection
 socket.on("disconnect", (reason) => {
-    console.warn(`⚠️ Socket.IO disconnected. Reason: ${reason}`);
+  console.warn(`⚠️ Socket.IO disconnected. Reason: ${reason}`);
+});
+
+// Attempt reconnection when disconnected
+socket.on("reconnect_attempt", (attemptNumber) => {
+  console.log(`🔄 Reconnect attempt #${attemptNumber}`);
+});
+
+socket.on("reconnect_failed", () => {
+  console.error("🚫 Reconnection failed after multiple attempts.");
+});
+
+socket.on("reconnect", (attemptNumber) => {
+  console.log(`✅ Reconnected successfully on attempt #${attemptNumber}`);
 });
