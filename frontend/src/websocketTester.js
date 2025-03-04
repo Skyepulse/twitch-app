@@ -1,5 +1,5 @@
-import { io } from "socket.io-client";
-import dotenv from "dotenv";
+const { io } = require("socket.io-client");
+const dotenv = require("dotenv");
 
 dotenv.config({ path: process.env.ENV_PATH || ".env" });
 
@@ -13,10 +13,10 @@ console.log("🚀 Connecting to WebSocket:", SOCKET_URL);
 
 // Initialize Socket.IO client
 const socket = io(SOCKET_URL, {
-  transports: ["websocket", "polling"], // Ensure fallback transport options
-  reconnectionAttempts: 5, // Retry 5 times before failing
-  timeout: 5000, // 5 seconds timeout
-  secure: SOCKET_URL.startsWith("wss"), // Automatically detect if secure
+  transports: ["websocket", "polling"],
+  reconnectionAttempts: 5,
+  timeout: 5000,
+  secure: SOCKET_URL.startsWith("wss"),
 });
 
 // Handle successful connection
