@@ -15,13 +15,14 @@ export abstract class SingleSocketServer {
     //================================//
     constructor(_server: any, _origin: string) {
         console.log("🚀 Initializing WebSocket Server...");
-        this.m_io = new Server(_server,
-            {
-                cors: {
-                    origin: _origin,
-                    methods: ['GET', 'POST']
-                }
-            });
+        this.m_io = new Server(_server, {
+            cors: {
+                origin: _origin,
+                methods: ['GET', 'POST']
+            },
+            transports: ["websocket"], // ✅ Force WebSockets only
+            allowEIO3: true // ✅ Support legacy clients if needed
+        });
 
         this.m_io.on('connection', (socket) => {
             console.log(`✅ New WebSocket connection: ${socket.id}`);
