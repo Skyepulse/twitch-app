@@ -2,6 +2,10 @@ import express from "express";
 import { createServer } from "http";
 import { WebSocketServer } from "ws"; // WebSocket Server
 
+//Import process.env
+import dotenv from 'dotenv';
+dotenv.config();
+
 const app = express();
 const server = createServer(app);
 const wss = new WebSocketServer({ noServer: true }); // Ensure WebSockets are handled separately
