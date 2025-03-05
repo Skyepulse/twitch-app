@@ -2,6 +2,10 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 
+//Import process.env
+import dotenv from 'dotenv';
+dotenv.config();
+
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
