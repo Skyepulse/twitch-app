@@ -4,10 +4,7 @@ const dotenv = require("dotenv");
 dotenv.config({ path: process.env.ENV_PATH || ".env" });
 
 // Determine WebSocket URL
-const SOCKET_URL =
-  process.env.REACT_APP_BACKEND_LB === "localhost"
-    ? `ws://${process.env.REACT_APP_BACKEND_LB}:${process.env.REACT_APP_BACKEND_PORT}`
-    : `${process.env.REACT_APP_BACKEND_PROTOCOL || "wss"}://${process.env.REACT_APP_BACKEND_HOST || "localhost"}:${process.env.REACT_APP_BACKEND_PORT || 8080}/socket.io/`;
+const SOCKET_URL = "wss://137.194.13.189:8080";
 
 console.log("🚀 Connecting to WebSocket:", SOCKET_URL);
 

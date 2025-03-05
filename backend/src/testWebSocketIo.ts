@@ -5,16 +5,10 @@ import { Server } from "socket.io";
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
-    path: "/socket.io/", // ✅ Ensure correct WebSocket path
     cors: {
         origin: "*", // ✅ Allow all origins
         methods: ["GET", "POST"]
     },
-    transports: ["websocket"], // ❗ Force WebSockets only
-    allowEIO3: true, // ✅ Support older clients
-    allowRequest: (req, callback) => {
-        callback(null, true); // ✅ Ensure all requests are allowed
-    }
 });
 
 // Handle WebSocket Connection
