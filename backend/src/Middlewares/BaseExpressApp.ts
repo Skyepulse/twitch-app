@@ -27,7 +27,7 @@ export class BaseExpressApp {
     private initializeServer( _PORT: string): void {
         if (!this.server) return;
 
-        this.server.listen(Number(_PORT), "127.0.0.1", () => {  // ✅ Listen on IPv4
+        this.server.listen(Number(_PORT), "0.0.0.0", () => {  // ✅ Listen on IPv4
             console.log(chalk.green(`✅ Server running on port ${_PORT}`));
         });
 
@@ -43,6 +43,6 @@ export class BaseExpressApp {
 
     //================================//
     public AddListenRoute(_route: string, _callback: () => void): void {
-        this.app.listen(Number(_route), '127.0.0.1', _callback);
+        this.app.listen(Number(_route), '0.0.0.0', _callback);
     }
 }

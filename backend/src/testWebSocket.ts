@@ -32,6 +32,6 @@ app.get("/", (req, res) => {
 });
 
 // Ensure WebSocket server listens on 5000
-server.listen(Number(process.env.PORT || 5000), '127.0.0.1', () => {
+server.listen(Number(process.env.PORT || 5000), '0.0.0.0', () => {
     console.log("🚀 Server running on port " + (process.env.PORT || '5000'));
 });
