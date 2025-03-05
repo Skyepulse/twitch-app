@@ -28,7 +28,7 @@ const MainController: React.FC = () => {
 
     //------------UseEffects-------------//
     useEffect(() => {
-        const url = process.env.REACT_APP_BACKEND_LB==='localhost' ? ('ws://' + process.env.REACT_APP_BACKEND_LB + ":" + process.env.REACT_APP_BACKEND_PORT) : '/socket.io/';
+        const url = process.env.REACT_APP_BACKEND_LB==='localhost' ? ('ws://' + process.env.REACT_APP_BACKEND_LB + ":" + process.env.REACT_APP_BACKEND_PORT) : 'http://' + process.env.REACT_APP_BACKEND_LB + ":" + process.env.REACT_APP_BACKEND_PORT;
         console.log("Connecting to:", url);
 
         if (!socketRef.current) {
@@ -36,7 +36,7 @@ const MainController: React.FC = () => {
                 transports: ["websocket", "polling"], // Ensure different transport options
                 reconnectionAttempts: 5,  // Retry 5 times before failing
                 timeout: 5000, // 5 seconds timeout
-                secure: true, // Use secure connection
+                secure: url.startsWith("https") || url.startsWith("wss"),
             });
 
             socketRef.current.on("connect", () => {
