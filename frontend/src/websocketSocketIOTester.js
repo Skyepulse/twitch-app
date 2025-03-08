@@ -4,7 +4,7 @@ const dotenv = require("dotenv");
 dotenv.config({ path: process.env.ENV_PATH || ".env" });
 
 // Determine WebSocket URL
-const SOCKET_URL = "http://137.194.13.189:8080";
+const SOCKET_URL = "wss://137.194.13.189:5000";
 
 console.log("🚀 Connecting to WebSocket:", SOCKET_URL);
 
@@ -13,7 +13,7 @@ const socket = io(SOCKET_URL, {
   transports: ["websocket", "polling"],
   reconnectionAttempts: 5,
   timeout: 5000,
-  secure: SOCKET_URL.startsWith("wss"),
+  secure: true,
 });
 
 // Handle successful connection

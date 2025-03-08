@@ -329,22 +329,22 @@ export class MyTwitchChat extends TwitchIRCSocket {
                 break;
             case '!up':
                 if (MazeManager.HasMaze().b) {
-                    MazeManager.AddUp();
+                    MazeManager.AddUp(_tags['user-id']);
                     break;
                 }
             case '!down':
                 if (MazeManager.HasMaze().b) {
-                    MazeManager.AddDown();
+                    MazeManager.AddDown(_tags['user-id']);
                     break;
                 }
             case '!right':
                 if (MazeManager.HasMaze().b) {
-                    MazeManager.AddRight();
+                    MazeManager.AddRight(_tags['user-id']);
                     break;
                 }
             case '!left':
                 if (MazeManager.HasMaze().b) {
-                    MazeManager.AddLeft();
+                    MazeManager.AddLeft(_tags['user-id']);
                     break;
                 }
             case '!help':

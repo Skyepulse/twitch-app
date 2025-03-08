@@ -1,4 +1,8 @@
 import { MazeGenerator, MazeInfo } from "./MazeGenerator.js";
+import Deque from "../../Utils/Deque.js";
+import { MazeMove } from "../../Interfaces/GameplayObjects/MazeMove.js";
+import { MyTwitchDBEndpoint } from "../MyTwitchDBEndpoint.js";
+
 
 //================================//
 export class MazeManager {
@@ -10,6 +14,8 @@ export class MazeManager {
     private mazeGenerator: MazeGenerator;
     private currentMazeInfo: MazeInfo | null = null;
     private currentPlayPosition: [number, number] = [0, 0];
+    private playerParticipationDictionary: { [key: string]: number } = {};
+    private playerChoiceDictionary: Deque<MazeMove> | undefined;
 
     //================================//
     private leftCount: number = 0;
@@ -32,6 +38,7 @@ export class MazeManager {
     //================================//
     constructor() {
         this.mazeGenerator = new MazeGenerator();
+        this.playerChoiceDictionary = new Deque<MazeMove>();
     }
 
     //================================//
@@ -54,6 +61,8 @@ export class MazeManager {
 
         MazeManager.m_instance.currentMazeInfo = this.m_instance.GenerateRandomMaze(width, height, [0, 0], [height-1, width-1]);
         MazeManager.m_instance.currentPlayPosition = [0, 0];
+        MazeManager.m_instance.playerChoiceDictionary = new Deque<MazeMove>();
+        MazeManager.m_instance.playerParticipationDictionary = {};
     }
 
     //================================//
@@ -63,8 +72,9 @@ export class MazeManager {
 
         if ( MazeManager.m_instance.mazeGenerator.CanMoveLeft(MazeManager.m_instance.MazeValue(...MazeManager.m_instance.PlayerPosition())) ) {
             MazeManager.m_instance.currentPlayPosition = MazeManager.m_instance.mazeGenerator.MoveLeft(MazeManager.m_instance.PlayerPosition());
+            this.UpdateParticipation("L");
         }
-
+        
         return MazeManager.m_instance.CheckWinCondition();
     }
 
@@ -75,6 +85,7 @@ export class MazeManager {
 
         if ( MazeManager.m_instance.mazeGenerator.CanMoveRight(MazeManager.m_instance.MazeValue(...MazeManager.m_instance.PlayerPosition())) ) {
             MazeManager.m_instance.currentPlayPosition = MazeManager.m_instance.mazeGenerator.MoveRight(MazeManager.m_instance.PlayerPosition());
+            this.UpdateParticipation("R");
         }
 
         return MazeManager.m_instance.CheckWinCondition();
@@ -87,6 +98,7 @@ export class MazeManager {
 
         if ( MazeManager.m_instance.mazeGenerator.CanMoveUp(MazeManager.m_instance.MazeValue(...MazeManager.m_instance.PlayerPosition())) ) {
             MazeManager.m_instance.currentPlayPosition = MazeManager.m_instance.mazeGenerator.MoveUp(MazeManager.m_instance.PlayerPosition());
+            this.UpdateParticipation("U");
         }
 
         return MazeManager.m_instance.CheckWinCondition();
@@ -99,6 +111,7 @@ export class MazeManager {
 
         if ( MazeManager.m_instance.mazeGenerator.CanMoveDown(MazeManager.m_instance.MazeValue(...MazeManager.m_instance.PlayerPosition())) ) {
             MazeManager.m_instance.currentPlayPosition = MazeManager.m_instance.mazeGenerator.MoveDown(MazeManager.m_instance.PlayerPosition());
+            this.UpdateParticipation("D");
         }
 
         return MazeManager.m_instance.CheckWinCondition();
@@ -120,7 +133,11 @@ export class MazeManager {
 
     //================================//
     public CheckWinCondition(): boolean {
-        return this.currentPlayPosition[0] === this.currentMazeInfo!.endPosition[0] && this.currentPlayPosition[1] === this.currentMazeInfo!.endPosition[1];
+        const win = this.currentPlayPosition[0] === this.currentMazeInfo!.endPosition[0] && this.currentPlayPosition[1] === this.currentMazeInfo!.endPosition[1];
+        if (win) {
+            this.AddPointsPerParticipation(1);
+        }
+        return win;
     }
 
     //================================//
@@ -142,36 +159,50 @@ export class MazeManager {
     }
 
     //================================//
-    public static AddLeft(): void {
+    public static AddLeft(player_id: string): void {
         if ( MazeManager.m_instance == null ) return;
         if ( MazeManager.m_instance.currentMazeInfo == null ) return;
+
+        if ( !MazeManager.m_instance.playerChoiceDictionary?.items.some(move => move.id === player_id)){
+            MazeManager.m_instance.playerChoiceDictionary?.pushFront({id: player_id, direction: "L"});
+        }
+
         if ( MazeManager.m_instance.mazeGenerator.CanMoveLeft(MazeManager.m_instance.MazeValue(...MazeManager.m_instance.PlayerPosition())) ) {
             MazeManager.m_instance.leftCount++;
         }
     }
 
     //================================//
-    public static AddRight(): void {
+    public static AddRight(player_id: string): void {
         if ( MazeManager.m_instance == null ) return;
         if ( MazeManager.m_instance.currentMazeInfo == null ) return;
+        if ( !MazeManager.m_instance.playerChoiceDictionary?.items.some(move => move.id === player_id)){
+            MazeManager.m_instance.playerChoiceDictionary?.pushFront({id: player_id, direction: "R"});
+        }
         if ( MazeManager.m_instance.mazeGenerator.CanMoveRight(MazeManager.m_instance.MazeValue(...MazeManager.m_instance.PlayerPosition())) ) {
             MazeManager.m_instance.rightCount++;
         }
     }
 
     //================================//
-    public static AddUp(): void {
+    public static AddUp(player_id: string): void {
         if ( MazeManager.m_instance == null ) return;
         if ( MazeManager.m_instance.currentMazeInfo == null ) return;
+        if ( !MazeManager.m_instance.playerChoiceDictionary?.items.some(move => move.id === player_id)){
+            MazeManager.m_instance.playerChoiceDictionary?.pushFront({id: player_id, direction: "U"});
+        }
         if ( MazeManager.m_instance.mazeGenerator.CanMoveUp(MazeManager.m_instance.MazeValue(...MazeManager.m_instance.PlayerPosition())) ) {
             MazeManager.m_instance.upCount++;
         }
     }
 
     //================================//
-    public static AddDown(): void {
+    public static AddDown(player_id: string): void {
         if ( MazeManager.m_instance == null ) return;
         if ( MazeManager.m_instance.currentMazeInfo == null ) return;
+        if ( !MazeManager.m_instance.playerChoiceDictionary?.items.some(move => move.id === player_id)){
+            MazeManager.m_instance.playerChoiceDictionary?.pushFront({id: player_id, direction: "D"});
+        }
         if ( MazeManager.m_instance.mazeGenerator.CanMoveDown(MazeManager.m_instance.MazeValue(...MazeManager.m_instance.PlayerPosition())) ) {
             MazeManager.m_instance.downCount++;
         }
@@ -211,5 +242,48 @@ export class MazeManager {
         MazeManager.resetValues();
 
         return true;
+    }
+
+    //================================//
+    public static UpdateParticipation(direction: "L" | "U" | "D" | "R"): void {
+        if (MazeManager.m_instance == null ) return;
+        if (MazeManager.m_instance.playerChoiceDictionary == undefined) return;
+
+        let safeExit: number = 0;
+        let top5: number = 0;
+
+        while ( !MazeManager.m_instance.playerChoiceDictionary.isEmpty() && safeExit < 10000)
+        {
+            const move: MazeMove | undefined = MazeManager.m_instance.playerChoiceDictionary.popBack();
+            
+            if ( move != undefined && move.direction === direction)
+            {
+                const points: number = top5 < 5 ? 5: 1;
+                if ( !(move.id in MazeManager.m_instance.playerParticipationDictionary))
+                {
+                    MazeManager.m_instance.playerParticipationDictionary[move.id] = points;
+                }
+                else
+                {
+                    MazeManager.m_instance.playerParticipationDictionary[move.id]+= points;
+                }
+                top5++;
+            }
+            safeExit++;
+        }
+
+        MazeManager.m_instance.playerChoiceDictionary = new Deque<MazeMove>();
+    }
+
+    //================================//
+    public AddPointsPerParticipation(mult: number): void {
+        Object.keys(this.playerParticipationDictionary).forEach( key => 
+        {
+            const id = key;
+            const points = this.playerParticipationDictionary[key];
+
+            MyTwitchDBEndpoint.AddClick(key, points * mult);
+        });
+        this.playerParticipationDictionary = {};
     }
 }
