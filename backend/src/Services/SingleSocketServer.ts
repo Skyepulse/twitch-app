@@ -18,7 +18,6 @@ export abstract class SingleSocketServer {
         this.m_io = new Server(_server, {
             cors: {
                 origin: _origin,
-                methods: ['GET', 'POST']
             }
         });
 

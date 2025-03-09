@@ -10,10 +10,14 @@ import { CheckPointsData } from './Models/Gameplay/CheckPointsData.js';
 import NetworkUsageInterface from './Middlewares/NetworkUsageInterface.js';
 
 import chalk from 'chalk';
+import { Request, Response } from 'express';
 
 //------------Members-------------//
 const PORT = process.env.PORT || '5000';
 const MyApp: BaseExpressApp = new BaseExpressApp(PORT);
+MyApp.AddGetRoute('/api/test', (_req: Request, res: Response) => {
+    res.send({ message: "Reverse proxy works with API!" });
+});
 const SocketServer: MyServer = new MyServer(MyApp.server, "*");
 
 //================================//
