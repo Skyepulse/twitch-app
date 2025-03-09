@@ -28,7 +28,7 @@ const MainController: React.FC = () => {
 
     //------------UseEffects-------------//
     useEffect(() => {
-        const url = process.env.REACT_APP_BACKEND_LB==='localhost' ? ('ws://' + process.env.REACT_APP_BACKEND_LB + ":" + process.env.REACT_APP_BACKEND_PORT) : 'https://' + process.env.REACT_APP_BACKEND_LB;
+        const url = process.env.REACT_APP_BACKEND_LB==='localhost' ? ('ws://' + process.env.REACT_APP_BACKEND_LB + ":" + process.env.REACT_APP_BACKEND_PORT) : 'https://www.008032025.xyz';
         console.log("Connecting to:", url);
 
         if (!socketRef.current) {
@@ -36,7 +36,7 @@ const MainController: React.FC = () => {
                 path: "/socket.io/",
                 reconnection: true,
                 reconnectionAttempts: 5,
-                rejectUnauthorized: true,
+                rejectUnauthorized: false,
                 timeout: 5000,
                 secure: url.startsWith("https") || url.startsWith("wss"),
             });
