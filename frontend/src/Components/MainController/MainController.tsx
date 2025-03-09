@@ -28,7 +28,7 @@ const MainController: React.FC = () => {
 
     //------------UseEffects-------------//
     useEffect(() => {
-        const url = process.env.REACT_APP_BACKEND_LB==='localhost' ? ('ws://' + process.env.REACT_APP_BACKEND_LB + ":" + process.env.REACT_APP_BACKEND_PORT) : 'http://' + process.env.REACT_APP_BACKEND_LB + ":" + process.env.REACT_APP_BACKEND_PORT;
+        const url = process.env.REACT_APP_BACKEND_LB==='localhost' ? ('wss://' + process.env.REACT_APP_BACKEND_LB + ":" + process.env.REACT_APP_BACKEND_PORT) : 'https://' + process.env.REACT_APP_BACKEND_LB + ":" + process.env.REACT_APP_BACKEND_PORT;
         console.log("Connecting to:", url);
 
         if (!socketRef.current) {
