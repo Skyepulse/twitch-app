@@ -4,7 +4,7 @@ const dotenv = require("dotenv");
 dotenv.config({ path: process.env.ENV_PATH || ".env" });
 
 // Determine WebSocket URL
-const SOCKET_URL = "wss://137.194.13.189:5000";
+const SOCKET_URL = "wss://008032025.xyz:5000";
 
 console.log("🚀 Connecting to WebSocket:", SOCKET_URL);
 
