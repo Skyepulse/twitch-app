@@ -1,50 +1,59 @@
-const { io } = require("socket.io-client");
-const dotenv = require("dotenv");
+const https = require('https');
+const { io } = require('socket.io-client');
 
-dotenv.config({ path: process.env.ENV_PATH || ".env" });
+async function testApi() {
+    const options = {
+        hostname: 'www.008032025.xyz',
+        path: '/api/test',
+        method: 'GET',
+        port: 443, // HTTPS default port
+        headers: {
+            'User-Agent': 'Node.js Client'
+        }
+    };
 
-// Determine WebSocket URL
-const SOCKET_URL = "https://008032025.xyz";
+    const req = https.request(options, (res) => {
+        let data = '';
 
-console.log("🚀 Connecting to WebSocket:", SOCKET_URL);
+        res.on('data', (chunk) => {
+            data += chunk;
+        });
 
-// Initialize Socket.IO client
-const socket = io(SOCKET_URL, {
-  reconnectionAttempts: 5,
-  timeout: 5000,
-  secure: true,
-});
+        res.on('end', () => {
+            console.log("Response from API:", data);
+        });
+    });
 
-// Handle successful connection
-socket.on("connect", () => {
-  console.log("✅ Socket.IO connected!");
-  socket.send("Hello Server!");
-});
+    req.on('error', (error) => {
+        console.error("Error fetching API:", error.message);
+    });
 
-// Handle incoming messages
-socket.on("message", (data) => {
-  console.log("📩 Message from server:", data);
-});
+    req.end();
+}
 
-// Handle connection errors
-socket.on("connect_error", (err) => {
-  console.error("❌ Socket.IO Error:", err.message);
-});
+// Test WebSocket connection
+function testSocket() {
+    const socket = io('https://www.008032025.xyz', {
+        path: '/socket.io/', // Important for reverse proxy
+        secure: true,
+        reconnection: true,
+        rejectUnauthorized: false // Allow self-signed certs if necessary
+    });
 
-// Handle disconnection
-socket.on("disconnect", (reason) => {
-  console.warn(`⚠️ Socket.IO disconnected. Reason: ${reason}`);
-});
+    socket.on('connect', () => {
+        console.log("Connected to WebSocket:", socket.id);
+        socket.emit('message', "Hello Server!");
+    });
 
-// Attempt reconnection when disconnected
-socket.on("reconnect_attempt", (attemptNumber) => {
-  console.log(`🔄 Reconnect attempt #${attemptNumber}`);
-});
+    socket.on('message', (data) => {
+        console.log("Received from server:", data);
+    });
 
-socket.on("reconnect_failed", () => {
-  console.error("🚫 Reconnection failed after multiple attempts.");
-});
+    socket.on('disconnect', () => {
+        console.log("Disconnected from WebSocket");
+    });
+}
 
-socket.on("reconnect", (attemptNumber) => {
-  console.log(`✅ Reconnected successfully on attempt #${attemptNumber}`);
-});
+// Run tests
+testApi();
+testSocket();
