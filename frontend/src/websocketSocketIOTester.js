@@ -37,7 +37,7 @@ function testSocket() {
         path: '/socket.io/', // Important for reverse proxy
         secure: true,
         reconnection: true,
-        rejectUnauthorized: false // Allow self-signed certs if necessary
+        rejectUnauthorized: true // Allow self-signed certs if necessary
     });
 
     socket.on('connect', () => {

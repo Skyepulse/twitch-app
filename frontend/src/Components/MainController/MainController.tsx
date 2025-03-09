@@ -33,8 +33,10 @@ const MainController: React.FC = () => {
 
         if (!socketRef.current) {
             socketRef.current = io(url, {
-                transports: ["websocket", "polling"],
+                path: "/socket.io/",
+                reconnection: true,
                 reconnectionAttempts: 5,
+                rejectUnauthorized: true,
                 timeout: 5000,
                 secure: url.startsWith("https") || url.startsWith("wss"),
             });
