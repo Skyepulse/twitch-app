@@ -12,9 +12,13 @@ const wss = new WebSocketServer({ noServer: true }); // Ensure WebSockets are ha
 
 // WebSocket Upgrade Handling
 server.on("upgrade", (request, socket, head) => {
-    wss.handleUpgrade(request, socket, head, (ws) => {
-        wss.emit("connection", ws, request);
-    });
+    if (request.url === "/") {  // ✅ Ensure only WebSocket requests are handled
+        wss.handleUpgrade(request, socket, head, (ws) => {
+            wss.emit("connection", ws, request);
+        });
+    } else {
+        socket.destroy();  // ❌ Reject invalid WebSocket requests
+    }
 });
 
 // WebSocket Connection Handling
@@ -37,6 +41,6 @@ app.get("/", (req, res) => {
 
 console.log('environment: \n'  + process.env);
 // Ensure WebSocket server listens on 5000
-server.listen(Number(process.env.PORT || 5000), '0.0.0.0', () => {
-    console.log("🚀 Server running on port " + (process.env.PORT || '5000'));
+server.listen(Number(process.env.PORT || 5001), '0.0.0.0', () => {
+    console.log("🚀 Server running on port " + (process.env.PORT || '5001'));
 });
