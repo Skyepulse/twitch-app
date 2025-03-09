@@ -32,12 +32,7 @@ const MainController: React.FC = () => {
         console.log("Connecting to:", url);
 
         if (!socketRef.current) {
-            socketRef.current = io(url, {
-                transports: ["websocket", "polling"], // Ensure different transport options
-                reconnectionAttempts: 5,  // Retry 5 times before failing
-                timeout: 5000, // 5 seconds timeout
-                secure: url.startsWith("https") || url.startsWith("wss"),
-            });
+            socketRef.current = io(url);
 
             socketRef.current.on("connect", () => {
                 console.log("✅ WebSocket Connected:", socketRef.current?.id);
