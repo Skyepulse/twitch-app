@@ -35,7 +35,7 @@ app.get("/", (req, res) => {
 });
 
 // Start the server (Only inside the VM)
-const PORT = Number(process.env.PORT || 5000);
+const PORT = Number(process.env.PORT || 5001);
 server.listen(PORT, "127.0.0.1", () => {
     console.log(`🚀 Socket.IO Server running at http://127.0.0.1:${PORT}`);
 });
