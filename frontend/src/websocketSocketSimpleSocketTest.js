@@ -1,15 +1,34 @@
-import WebSocket from "ws";
+const https = require('https');
 
-const ws = new WebSocket("wss://008032025.xyz:5000");
+async function testApi() {
+    const options = {
+        hostname: 'www.008032025.xyz',
+        path: '/api/test',
+        method: 'GET',
+        port: 443, // HTTPS default port
+        headers: {
+            'User-Agent': 'Node.js Client'
+        }
+    };
 
-ws.on("open", () => {
-  console.log("✅ Connected to WebSocket server");
-  ws.send("Hello from client!");
-});
+    const req = https.request(options, (res) => {
+        let data = '';
 
-ws.on("message", (message) => {
-  console.log("📩 Received:", message.toString());
-});
+        res.on('data', (chunk) => {
+            data += chunk;
+        });
 
-ws.on("close", () => console.log("🔴 WebSocket Closed"));
-ws.on("error", (err) => console.error("⚠️ WebSocket Error:", err));
+        res.on('end', () => {
+            console.log("Response from API:", data);
+        });
+    });
+
+    req.on('error', (error) => {
+        console.error("Error fetching API:", error.message);
+    });
+
+    req.end();
+}
+
+// Run the test
+testApi();
