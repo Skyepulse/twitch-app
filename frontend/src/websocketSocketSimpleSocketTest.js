@@ -1,6 +1,6 @@
 import WebSocket from "ws";
 
-const ws = new WebSocket("ws://137.194.13.189:8080");
+const ws = new WebSocket("wss://008032025.xyz:5000");
 
 ws.on("open", () => {
   console.log("✅ Connected to WebSocket server");
