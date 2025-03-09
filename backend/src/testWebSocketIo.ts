@@ -1,41 +1,37 @@
-import express from "express";
-import { createServer } from "http";
-import { Server } from "socket.io";
-
-//Import process.env
-import dotenv from 'dotenv';
-dotenv.config();
+import express, { Request, Response } from 'express';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 
 const app = express();
-const server = createServer(app);
-const io = new Server(server, {
+const PORT = 5000;
+
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
     cors: {
-        origin: "*", // ✅ Allow all origins
-        methods: ["GET", "POST"]
-    },
+        origin: '*', // Adjust if needed
+    }
 });
 
-// Handle WebSocket Connection
-io.on("connection", (socket) => {
-    console.log(`✅ Socket.IO Client Connected: ${socket.id}`);
+// Simple API route
+app.get('/api/test', (_req: Request, res: Response) => {
+    res.json({ message: "Reverse proxy works with API!" });
+});
 
-    socket.on("message", (message) => {
-        console.log("📩 Message received:", message);
-        socket.send("Hello from Socket.IO server!");
+// Handle WebSocket connections
+io.on('connection', (socket) => {
+    console.log('Client connected:', socket.id);
+
+    socket.on('message', (msg) => {
+        console.log('Received message:', msg);
+        socket.emit('message', `Server received: ${msg}`);
     });
 
-    socket.on("disconnect", () => {
-        console.log(`🔴 Client Disconnected: ${socket.id}`);
+    socket.on('disconnect', () => {
+        console.log('Client disconnected:', socket.id);
     });
 });
 
-// Simple Express Route
-app.get("/", (req, res) => {
-    res.send("✅ Socket.IO Server is running!");
-});
-
-// Start the server (Only inside the VM)
-const PORT = Number(process.env.PORT || 5001);
-server.listen(PORT, "127.0.0.1", () => {
-    console.log(`🚀 Socket.IO Server running at http://127.0.0.1:${PORT}`);
+// Start server
+httpServer.listen(PORT, () => {
+    console.log(`Backend with WebSockets running on http://localhost:${PORT}`);
 });
