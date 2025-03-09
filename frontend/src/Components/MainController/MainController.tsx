@@ -33,9 +33,9 @@ const MainController: React.FC = () => {
 
         if (!socketRef.current) {
             socketRef.current = io(url, {
-                transports: ["websocket", "polling"], // Ensure different transport options
-                reconnectionAttempts: 5,  // Retry 5 times before failing
-                timeout: 5000, // 5 seconds timeout
+                transports: ["websocket", "polling"],
+                reconnectionAttempts: 5,
+                timeout: 5000,
                 secure: url.startsWith("https") || url.startsWith("wss"),
             });
 

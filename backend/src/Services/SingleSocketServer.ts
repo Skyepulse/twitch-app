@@ -19,9 +19,7 @@ export abstract class SingleSocketServer {
             cors: {
                 origin: _origin,
                 methods: ['GET', 'POST']
-            },
-            transports: ["websocket"], // ✅ Force WebSockets only
-            allowEIO3: true // ✅ Support legacy clients if needed
+            }
         });
 
         this.m_io.on('connection', (socket) => {
