@@ -21,4 +21,4 @@ my reverse proxy handles the rest.
 - Caddy 2 proxy and reverse proxy
 - SSL secure certification for https connection
 
-Go to my project [HERE](www.008032025.xyz).
+Go to my project [HERE](https://www.008032025.xyz).
