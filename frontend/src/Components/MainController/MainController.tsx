@@ -41,6 +41,11 @@ const MainController: React.FC = () => {
                 secure: url.startsWith("https") || url.startsWith("wss"),
             });
 
+            socketRef.current.on("error", (error: Error) => {
+                // Show the error message as a popup
+                alert(`WebSocket Error: ${error.message}`);
+            });
+
             socketRef.current.on("connect", () => {
                 console.log("✅ WebSocket Connected:", socketRef.current?.id);
             });
