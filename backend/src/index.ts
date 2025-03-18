@@ -18,7 +18,7 @@ const MyApp: BaseExpressApp = new BaseExpressApp(PORT);
 MyApp.AddGetRoute('/api/test', (_req: Request, res: Response) => {
     res.send({ message: "Reverse proxy works with API!" });
 });
-const SocketServer: MyServer = new MyServer(MyApp.server, "*");
+const SocketServer: MyServer = new MyServer(MyApp.server, "*", 1);
 
 //================================//
 const TwitchClient: MyTwitchChat = new MyTwitchChat(process.env.TWITCH_USERNAME!, [process.env.TWITCH_CHANNEL!], false);

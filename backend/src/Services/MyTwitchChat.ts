@@ -1,14 +1,15 @@
 import EventSystem from "../Middlewares/EventSystem.js";
 import { CheckPointsData } from "../Models/Gameplay/CheckPointsData.js";
 import { MazeManager } from "./GamePlay/MazeManager.js";
+import { MultipleSocketServer } from "./MultipleSocketServer.js";
 import { MyTwitchDBEndpoint } from "./MyTwitchDBEndpoint.js";
-import { SingleSocketServer } from "./SingleSocketServer.js";
+import { SocketServer } from "./SocketServer.js";
 import { TwitchIRCSocket } from "./TwitchIRCSocket.js";
 import chalk from "chalk";
 
 //================================//
 export class MyTwitchChat extends TwitchIRCSocket {
-    private ListeningSocketServers  : SingleSocketServer[] = [];
+    private ListeningSocketServers  : SocketServer[] = [];
 
     //================================//
     private currentTotalClicks: number = 0;
@@ -127,7 +128,7 @@ export class MyTwitchChat extends TwitchIRCSocket {
     }
 
     //================================//
-    private onNewClientConnected(): void {
+    private onNewClientConnected(client_socket: string): void {
         this.B_refreshClicks = true;
         this.B_refreshMaze = true;
     }
@@ -139,14 +140,14 @@ export class MyTwitchChat extends TwitchIRCSocket {
     }
 
     //================================//
-    public addListenerServer(_server: SingleSocketServer): void {
+    public addListenerServer(_server: MultipleSocketServer): void {
         if (_server === null) return;
 
         this.ListeningSocketServers.push(_server);
     }
 
     //================================//
-    public removeListenerSocket(_server: SingleSocketServer): void {
+    public removeListenerSocket(_server: MultipleSocketServer): void {
         const index = this.ListeningSocketServers.indexOf(_server);
         if (index !== -1) {
             this.ListeningSocketServers.splice(index, 1);
@@ -175,7 +176,7 @@ export class MyTwitchChat extends TwitchIRCSocket {
                 console.error(chalk.red('Error getting total clicks!'));
             } else {
                 this.ListeningSocketServers.forEach(server => {
-                    server.SendMessage('total-clicks', { totalClicks: result });
+                    server.BroadcastMessage('total-clicks', { totalClicks: result });
                 });
                 this.currentTotalClicks = result;
             }
@@ -191,7 +192,7 @@ export class MyTwitchChat extends TwitchIRCSocket {
             this.B_refreshMaze = false;
             const { grid, start, end, playerPos } = mazeInfo;
             this.ListeningSocketServers.forEach(server => {
-                server.SendMessage('maze-data', { grid: grid, position: playerPos, win: win});
+                server.BroadcastMessage('maze-data', { grid: grid, position: playerPos, win: win});
             });
         }
     }
@@ -211,7 +212,7 @@ export class MyTwitchChat extends TwitchIRCSocket {
                         topClickers.push({ position: i + 1, user_id: result[i].user_id, username: result[i].username, click_count: result[i].click_count });
                     }
                     this.ListeningSocketServers.forEach(server => {
-                        server.SendMessage('top-clickers', { topClickers: topClickers });
+                        server.BroadcastMessage('top-clickers', { topClickers: topClickers });
                     });
                 }
             }
@@ -244,7 +245,7 @@ export class MyTwitchChat extends TwitchIRCSocket {
             this.onReceivedCommand(_channel, _tags, _message);
         } else {
             this.ListeningSocketServers.forEach(server => {
-                server.SendMessage('chat-message', { username: _tags.username, message: _message, channel: _channel });
+                server.BroadcastMessage('chat-message', { username: _tags.username, message: _message, channel: _channel });
             });
         }
     }
