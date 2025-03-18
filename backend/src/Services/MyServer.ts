@@ -1,24 +1,42 @@
 import { Socket } from '../../node_modules/socket.io/dist/index.js';
-import { SingleSocketServer } from './SingleSocketServer.js';
+import { MultipleSocketServer } from './MultipleSocketServer.js';
 import chalk from 'chalk';
 
 //================================//
-export class MyServer extends SingleSocketServer{
+export class MyServer extends MultipleSocketServer {
 
-    SendMessage(_event: string, _data: any): void {
-        let client = this.getSingleClient();
+    //================================//
+    SendMessage(_id: string, _event: string, _data: any): void {
+        let client = this.m_Clients?.find((client) => client.id === _id);
         if (client === null) {
             return;
         }
 
-        client.emit(_event, _data);
-        this.m_numberOfOutgoingMessages++;
-        this.m_totalOutgoingSize += Buffer.byteLength(JSON.stringify(_data));
+        if ( client !== undefined ) {
+            client.emit(_event, _data);
+
+            this.m_numberOfOutgoingMessages++;
+            this.m_totalOutgoingSize += Buffer.byteLength(JSON.stringify(_data));
+        }
     }
 
     //================================//
-    constructor(_server: any, _origin: string) {
-        super(_server, _origin);
+    BroadcastMessage(_event: string, _data: any): void {
+        if (this.m_Clients === null) {
+            return;
+        }
+
+        this.m_Clients.forEach((client) => {
+            client.emit(_event, _data);
+
+            this.m_numberOfOutgoingMessages++;
+            this.m_totalOutgoingSize += Buffer.byteLength(JSON.stringify(_data));
+        });
+    }
+
+    //================================//
+    constructor(_server: any, _origin: string, _maxClients: number) {
+        super(_server, _origin, _maxClients);
     }
 
     //================================//

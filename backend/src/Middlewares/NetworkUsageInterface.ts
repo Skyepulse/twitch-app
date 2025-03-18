@@ -1,10 +1,10 @@
 import os from "os";
 import fs from "fs";
 import { TwitchIRCSocket } from "../Services/TwitchIRCSocket";
-import { SingleSocketServer } from "../Services/SingleSocketServer";
 import { DatabaseConnectionEndpoint } from "../Services/DatabaseConnectionEndpoint";
 import chalk from "chalk";
 import path from "path";
+import { SocketServer } from "../Services/SocketServer";
 
 //================================//    
 interface NetworkStats {
@@ -45,7 +45,7 @@ export default class NetworkUsageInterface {
     //================================//
     public static async Init(
         IRCServers: TwitchIRCSocket[], 
-        SocketServers: SingleSocketServer[], 
+        SocketServers: SocketServer[], 
         DatabaseEndpoints: DatabaseConnectionEndpoint[]
     ): Promise<void> {
         if (this.running) return; // Prevent multiple intervals

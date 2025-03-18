@@ -1,19 +1,16 @@
 import { Server, Socket } from '../../node_modules/socket.io/dist/index.js';
 import EventSystem from '../Middlewares/EventSystem.js';
+import { SocketServer } from './SocketServer.js';
 
 //================================//
-export abstract class SingleSocketServer {
+export abstract class SingleSocketServer extends SocketServer {
     private m_io: Server;
     private m_singleClient: Socket | null = null;
 
     //================================//
-    protected m_numberOfIncomingMessages: number = 0;
-    protected m_numberOfOutgoingMessages: number = 0;
-    protected m_totalIncomingSize: number = 0.0;
-    protected m_totalOutgoingSize: number = 0.0;
-
-    //================================//
     constructor(_server: any, _origin: string) {
+        super();
+
         console.log("🚀 Initializing WebSocket Server...");
         this.m_io = new Server(_server, {
             cors: {
@@ -42,7 +39,7 @@ export abstract class SingleSocketServer {
 
         this.m_singleClient = socket;
         this.m_singleClient.send('You are connected.');
-        EventSystem.Emit('new-client-connected', {});
+        EventSystem.Emit('new-client-connected', {client_socket: socket});
 
         socket.on('disconnect', () => {
             this.m_singleClient = null;
@@ -52,16 +49,6 @@ export abstract class SingleSocketServer {
     //================================//
     public getSingleClient(): Socket | null {
         return this.m_singleClient;
-    }
-
-    //================================//
-    abstract SendMessage(_event: string, _data: any): void;
-
-    //================================//
-    public getUsageInformation(): string {
-        const MBIncoming = (this.m_totalIncomingSize / 1024 / 1024).toFixed(3);
-        const MBOutgoing = (this.m_totalOutgoingSize / 1024 / 1024).toFixed(3);
-        return `Fom single socket server, Incoming messages: ${this.m_numberOfIncomingMessages}, Outgoing messages: ${this.m_numberOfOutgoingMessages}, Incoming size: ${MBIncoming} MB, Outgoing size: ${MBOutgoing} MB`;
     }
 
     //================================//
