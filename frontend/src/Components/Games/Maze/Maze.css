@@ -25,6 +25,10 @@
     background-color: red;
 }
 
+.waypoint-cell {
+    background-color: blue;
+}
+
 /* Add specific borders */
 .border-top {
     border-top-color: black;

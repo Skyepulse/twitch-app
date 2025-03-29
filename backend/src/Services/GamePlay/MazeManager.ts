@@ -118,10 +118,10 @@ export class MazeManager {
     }
 
     //================================//
-    public static GetMazeInfo(): { grid: number[][], start: [number, number], end: [number, number], playerPos: [number, number] } | null {
+    public static GetMazeInfo(): { grid: number[][], start: [number, number], end: [number, number], playerPos: [number, number], wayPoints: {[key: number]: number} } | null {
         if ( MazeManager.m_instance == null ) return null;
 
-        return { grid: MazeManager.m_instance.currentMazeInfo!.grid, start: MazeManager.m_instance.currentMazeInfo!.startPosition, end: MazeManager.m_instance.currentMazeInfo!.endPosition, playerPos: MazeManager.m_instance.currentPlayPosition };
+        return { grid: MazeManager.m_instance.currentMazeInfo!.grid, start: MazeManager.m_instance.currentMazeInfo!.startPosition, end: MazeManager.m_instance.currentMazeInfo!.endPosition, playerPos: MazeManager.m_instance.currentPlayPosition, wayPoints: MazeManager.m_instance.currentMazeInfo!.waypoints };
     }
 
     //================================//
@@ -252,6 +252,8 @@ export class MazeManager {
         let safeExit: number = 0;
         let top5: number = 0;
 
+        const isWaypoint: number = this.isWaypoint();
+
         while ( !MazeManager.m_instance.playerChoiceDictionary.isEmpty() && safeExit < 10000)
         {
             const move: MazeMove | undefined = MazeManager.m_instance.playerChoiceDictionary.popBack();
@@ -268,6 +270,11 @@ export class MazeManager {
                     MazeManager.m_instance.playerParticipationDictionary[move.id]+= points;
                 }
                 top5++;
+
+                if (isWaypoint > 0)
+                {
+                    MazeManager.m_instance.AddWaypointPoints(isWaypoint, move.id);
+                }
             }
             safeExit++;
         }
@@ -285,5 +292,31 @@ export class MazeManager {
             MyTwitchDBEndpoint.AddClick(key, points * mult);
         });
         this.playerParticipationDictionary = {};
+    }
+
+    //================================//
+    public static isWaypoint(): number{
+        if (MazeManager.m_instance == null ) return 0;
+        if (MazeManager.m_instance.currentMazeInfo == null ) return 0;
+
+        const currentPos = MazeManager.m_instance.PlayerPosition();
+        const grid = MazeManager.m_instance.currentMazeInfo.grid;
+        const waypoints = MazeManager.m_instance.currentMazeInfo.waypoints;
+
+        let isWaypoint = 0;
+        const cellUID = MazeGenerator.GetCellUid(currentPos, grid[0].length, grid.length);
+
+        if (cellUID in waypoints) {
+            isWaypoint = waypoints[cellUID];
+            // remove the waypoint from the dictionary
+            delete waypoints[cellUID];
+        }
+
+        return isWaypoint;
+    }
+
+    //================================//
+    public AddWaypointPoints(points: number, player_id: string): void {
+        MyTwitchDBEndpoint.AddClick(player_id, points);
     }
 }

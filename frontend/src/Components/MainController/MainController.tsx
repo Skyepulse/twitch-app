@@ -25,6 +25,7 @@ const MainController: React.FC = () => {
     const [grid, setGrid] = useState<number[][]>([]);
     const [playerPos, setPos] = useState<[number, number]>([0, 0]);
     const [mazeWin, setMazeWin] = useState<boolean>(false);
+    const [mazeWayPoints, setMazeWayPoints] = useState<{ [key: number]: number }>({});
 
     //------------UseEffects-------------//
     useEffect(() => {
@@ -107,10 +108,11 @@ const MainController: React.FC = () => {
     useEffect(() => {
         if (!socketRef.current) return;
         
-        const handleMazeData = (data: { grid: number[][], position: [number, number], win: boolean }) => {
+        const handleMazeData = (data: { grid: number[][], position: [number, number], wayPoints: {[key: number]: number}, win: boolean }) => {
             setGrid(data.grid);
             setPos(data.position);
             setMazeWin(data.win);
+            setMazeWayPoints(data.wayPoints);
         };
 
         clickCounterRef.current?.forceRender(grid.length);
@@ -131,7 +133,7 @@ const MainController: React.FC = () => {
             <div ref={middleContainerRef} className="main-controller-body">
                 <ClickCounter ref={clickCounterRef} clicks = {clicks}/>
                 {grid.length > 0 && (
-                    <Maze grid={grid} position={playerPos} win={mazeWin} ref={null}/>
+                    <Maze grid={grid} position={playerPos} win={mazeWin} wayPoints={mazeWayPoints} ref={null}/>
                 )}
             </div>
             <div className="main-controller-footer">

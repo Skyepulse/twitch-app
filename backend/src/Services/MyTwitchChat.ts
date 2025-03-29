@@ -190,9 +190,9 @@ export class MyTwitchChat extends TwitchIRCSocket {
         const mazeInfo = MazeManager.GetMazeInfo();
         if (mazeInfo) {
             this.B_refreshMaze = false;
-            const { grid, start, end, playerPos } = mazeInfo;
+            const { grid, start, end, playerPos, wayPoints } = mazeInfo;
             this.ListeningSocketServers.forEach(server => {
-                server.BroadcastMessage('maze-data', { grid: grid, position: playerPos, win: win});
+                server.BroadcastMessage('maze-data', { grid: grid, position: playerPos, wayPoints: wayPoints, win: win});
             });
         }
     }

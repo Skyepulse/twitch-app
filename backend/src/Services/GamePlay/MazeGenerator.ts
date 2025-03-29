@@ -28,6 +28,7 @@ export interface MazeInfo {
     grid: number[][];
     startPosition: [number, number];
     endPosition: [number, number];
+    waypoints: { [key: number]: number }; // Dictionary of waypoints
 }
 
 export class MazeGenerator{
@@ -44,11 +45,19 @@ export class MazeGenerator{
     private grid: number[][] = [];
     private visitOrder: number[][] = [];
     private currentVisitOrder: number = 1;
+    private waypoints: { [key: number]: number } = {}; // Dictionary to store waypoints
+    private wayPointProbability: number = 0;
+    private probabilityStep: number = 0.05; // Add 5% to the probability of adding a waypoint each time we carve a step
+    private score: number = 25;
+    private scoreStep: number = 25;
 
     //================================//
     private InitializeGrid = (width: number, height: number): void => {
         this.grid = Array.from({ length: height }, () => Array(width).fill(0));
         this.visitOrder = Array.from({ length: height }, () => Array(width).fill(0));
+        this.waypoints = {};
+        this.wayPointProbability = 0.05; // Reset the waypoint probability
+        this.score = 25; // Reset the score
         this.currentVisitOrder = 1;
     }
 
@@ -56,6 +65,19 @@ export class MazeGenerator{
     private CarvePassageFrom = (currentRow: number, currentColumn: number): void => { 
         this.visitOrder[currentRow][currentColumn] = this.currentVisitOrder
         this.currentVisitOrder++; 
+
+        // Randomly decide to add a waypoint
+        if (Math.random() < this.wayPointProbability) {
+            const cellUID = MazeGenerator.GetCellUid([currentRow, currentColumn], this.grid[0].length, this.grid.length);
+            this.waypoints[cellUID] = this.score;
+            this.score += this.scoreStep;
+            this.wayPointProbability = 0;
+        } else {
+            this.wayPointProbability += this.probabilityStep;
+            if (this.wayPointProbability > 1) {
+                this.wayPointProbability = 1;
+            }
+        }
 
         // Random directions
         const directions = [this.N, this.S, this.E, this.W].sort(() => Math.random() - 0.5);
@@ -125,7 +147,8 @@ export class MazeGenerator{
             return {
                 grid: [],
                 startPosition: [0, 0],
-                endPosition: [0, 0]
+                endPosition: [0, 0],
+                waypoints: {}
             };
         }
 
@@ -134,7 +157,8 @@ export class MazeGenerator{
             return {
                 grid: [],
                 startPosition: [0, 0],
-                endPosition: [0, 0]
+                endPosition: [0, 0],
+                waypoints: {}
             };
         }
 
@@ -147,7 +171,8 @@ export class MazeGenerator{
         return {
             grid: this.grid,
             startPosition: startPos,
-            endPosition: endPos
+            endPosition: endPos,
+            waypoints: this.waypoints
         };
     }
 
@@ -189,6 +214,15 @@ export class MazeGenerator{
     //================================//
     public MoveDown = (position: [number, number]): [number, number] => {
         return [position[0] + this.DY[this.S], position[1] + this.DX[this.S]];
+    }
+
+    //================================//
+    public static GetCellUid = (position: [number, number], width: number, height: number): number => {
+        if (position[0] < 0 || position[0] >= height || position[1] < 0 || position[1] >= width) {
+            console.error("Invalid position");
+            return -1;
+        }
+        return position[0] * width + position[1];
     }
 }
 
