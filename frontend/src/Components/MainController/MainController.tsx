@@ -8,6 +8,7 @@ import TopClikers from "../Top Clickers/TopClickers";
 import AnimatedClick, {getRandomPosition} from "../AnimatedClick/AnimatedClick";
 import './MainController.css';
 import { createRoot } from "react-dom/client";
+import URLButton from "../URLButton/URLButton";
 
 //================================//
 const MainController: React.FC = () => {
@@ -25,6 +26,8 @@ const MainController: React.FC = () => {
     const [grid, setGrid] = useState<number[][]>([]);
     const [playerPos, setPos] = useState<[number, number]>([0, 0]);
     const [mazeWin, setMazeWin] = useState<boolean>(false);
+    const [mazeWayPoints, setMazeWayPoints] = useState<{ [key: number]: number }>({});
+    const [mazeOnWayPoint, setMazeOnWayPoint] = useState<boolean>(false);
 
     //------------UseEffects-------------//
     useEffect(() => {
@@ -107,10 +110,12 @@ const MainController: React.FC = () => {
     useEffect(() => {
         if (!socketRef.current) return;
         
-        const handleMazeData = (data: { grid: number[][], position: [number, number], win: boolean }) => {
+        const handleMazeData = (data: { grid: number[][], position: [number, number], wayPoints: {[key: number]: number}, win: boolean, onWaypoint: boolean }) => {
             setGrid(data.grid);
             setPos(data.position);
             setMazeWin(data.win);
+            setMazeWayPoints(data.wayPoints);
+            setMazeOnWayPoint(data.onWaypoint);
         };
 
         clickCounterRef.current?.forceRender(grid.length);
@@ -127,15 +132,16 @@ const MainController: React.FC = () => {
         <div className="main-controller-wrapper">
             <div className="main-controller-header">
                 <TopClikers topClickers = {topClickers}/>
+                <Chat messages = {messages}/>
             </div>
             <div ref={middleContainerRef} className="main-controller-body">
                 <ClickCounter ref={clickCounterRef} clicks = {clicks}/>
                 {grid.length > 0 && (
-                    <Maze grid={grid} position={playerPos} win={mazeWin} ref={null}/>
+                    <Maze grid={grid} position={playerPos} win={mazeWin} wayPoints={mazeWayPoints} onWayPoint={mazeOnWayPoint} ref={null}/>
                 )}
             </div>
             <div className="main-controller-footer">
-                <Chat messages = {messages}/>
+                <URLButton url={'https://www.twitch.tv/elmrysow'} text={'Click here to join my twitch chat and participate!'}/>
             </div>
         </div>
     )
