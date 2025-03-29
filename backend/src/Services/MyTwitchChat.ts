@@ -88,7 +88,7 @@ export class MyTwitchChat extends TwitchIRCSocket {
                 if (this.mazeResetTimer <= 0)
                 {
                     this.updateMazeTimer = this.updateMaze;
-                    MazeManager.ResetMaze(5, 4);
+                    MazeManager.ResetMaze(10, 8);
                     this.B_refreshMaze = true;
                 }
             } 
@@ -104,9 +104,9 @@ export class MyTwitchChat extends TwitchIRCSocket {
                         this.B_refreshMaze = true;
                     }
     
-                    const { b, won } = MazeManager.HasMaze();
+                    const { b, won, onWaypoint } = MazeManager.HasMaze();
                     if (!b){
-                        MazeManager.ResetMaze(5, 4);
+                        MazeManager.ResetMaze(10, 8);
                         this.B_refreshMaze = true;
                     } else if (won) {
                         this.mazeResetTimer = this.mazeResetRefreshTime;
@@ -117,8 +117,8 @@ export class MyTwitchChat extends TwitchIRCSocket {
 
         //Update send maze info
         if (this.B_refreshMaze) {
-            const { b, won } = MazeManager.HasMaze();
-            this.sendGridAndPosition(won);
+            const { b, won, onWaypoint } = MazeManager.HasMaze();
+            this.sendGridAndPosition(won, onWaypoint);
         }
     }
 
@@ -184,7 +184,7 @@ export class MyTwitchChat extends TwitchIRCSocket {
     }   
 
     //================================//
-    private sendGridAndPosition(win: boolean): void {
+    private sendGridAndPosition(win: boolean, onWaypoint: boolean): void {
         if (!this.CanSendToSocketServers()) return;
 
         const mazeInfo = MazeManager.GetMazeInfo();
@@ -192,7 +192,7 @@ export class MyTwitchChat extends TwitchIRCSocket {
             this.B_refreshMaze = false;
             const { grid, start, end, playerPos, wayPoints } = mazeInfo;
             this.ListeningSocketServers.forEach(server => {
-                server.BroadcastMessage('maze-data', { grid: grid, position: playerPos, wayPoints: wayPoints, win: win});
+                server.BroadcastMessage('maze-data', { grid: grid, position: playerPos, wayPoints: wayPoints, win: win, onWaypoint: onWaypoint });
             });
         }
     }

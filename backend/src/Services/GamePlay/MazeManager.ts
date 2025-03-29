@@ -16,6 +16,7 @@ export class MazeManager {
     private currentPlayPosition: [number, number] = [0, 0];
     private playerParticipationDictionary: { [key: string]: number } = {};
     private playerChoiceDictionary: Deque<MazeMove> | undefined;
+    private onWaypoint: boolean = false;
 
     //================================//
     private leftCount: number = 0;
@@ -141,11 +142,11 @@ export class MazeManager {
     }
 
     //================================//
-    public static HasMaze(): { b: boolean, won: boolean} {
-        if ( MazeManager.m_instance == null ) return { b: false, won: false };
-        if ( MazeManager.m_instance.currentMazeInfo == null ) return { b: false, won: false };
+    public static HasMaze(): { b: boolean, won: boolean, onWaypoint: boolean } {
+        if ( MazeManager.m_instance == null ) return { b: false, won: false, onWaypoint: false };
+        if ( MazeManager.m_instance.currentMazeInfo == null ) return { b: false, won: false, onWaypoint: false };
 
-        return { b: true, won: MazeManager.m_instance.CheckWinCondition() };
+        return { b: true, won: MazeManager.m_instance.CheckWinCondition(), onWaypoint: MazeManager.m_instance.onWaypoint };
     }
 
     //================================//
@@ -253,6 +254,7 @@ export class MazeManager {
         let top5: number = 0;
 
         const isWaypoint: number = this.isWaypoint();
+        MazeManager.m_instance.onWaypoint = isWaypoint > 0 ? true : false;
 
         while ( !MazeManager.m_instance.playerChoiceDictionary.isEmpty() && safeExit < 10000)
         {

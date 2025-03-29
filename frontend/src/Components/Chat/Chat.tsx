@@ -9,13 +9,13 @@ const Chat: React.FC<ChatProps> = ({messages}) => {
     return (
         <div className="chat-wrapper">
             <h1>Chat Messages</h1>
-            <ul>
-                {messages.slice(-3).map((message, index) => (
-                    <li key={index}>
+            <div className="chat-box">
+                {messages.slice(-15).map((message, index) => (
+                    <div key={index} className="message">
                         <strong>{message.username}</strong>: {message.message}
-                    </li>
+                    </div>
                 ))}
-            </ul>
+            </div>
         </div>
     )
 };

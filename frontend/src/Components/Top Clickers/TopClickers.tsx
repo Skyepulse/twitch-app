@@ -38,7 +38,7 @@ const TopClickers: React.FC<TopClicksProps> = ({ topClickers }) => {
 
     return (
         <div className="top-clickers-wrapper">
-            <h1>Best Contributors:</h1>
+            <h1>Best Contributors</h1>
             {topClickers.length > 0 ? (
                 <ul>
                     {topClickers.slice(startIndex, startIndex + MaxTopN).map(tc => (

@@ -29,6 +29,14 @@
     background-color: blue;
 }
 
+.end-cell {
+    background-color: green;
+}
+
+.hidden-cell {
+    background-color: black;
+}
+
 /* Add specific borders */
 .border-top {
     border-top-color: black;
