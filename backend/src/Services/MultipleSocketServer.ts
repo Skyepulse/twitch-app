@@ -27,7 +27,7 @@ export abstract class MultipleSocketServer extends SocketServer {
         });
 
         this.m_io.on('connection', (socket) => {
-            console.log(`✅ New WebSocket connection: ${socket.id}`);
+            //console.log(`✅ New WebSocket connection: ${socket.id}`);
             this.onClientConnection(socket);
         });
 
@@ -61,7 +61,7 @@ export abstract class MultipleSocketServer extends SocketServer {
         }
 
         this.m_Clients.push(socket);
-        console.log('Total clients:', this.m_Clients.length);
+        //console.log('Total clients:', this.m_Clients.length);
 
         socket.send('You are connected.');
         EventSystem.Emit('new-client-connected', {client_socket: socket});
@@ -73,7 +73,7 @@ export abstract class MultipleSocketServer extends SocketServer {
             }
 
             this.m_Clients = this.m_Clients.filter((client) => client.id !== socket.id);
-            console.log('Total clients:', this.m_Clients.length);
+            //console.log('Total clients:', this.m_Clients.length);
         });
     }
 

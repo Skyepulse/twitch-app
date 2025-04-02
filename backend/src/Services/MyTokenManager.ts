@@ -146,6 +146,8 @@ export class MyTokenManager extends DatabaseConnectionEndpoint{
 
         this.TokenData = newTokenData;
 
+        console.log(chalk.green('Access token refreshed successfully: ', access_token));
+
         return await MyTokenManager.UpdateTokenData(newTokenData);
     }
 
