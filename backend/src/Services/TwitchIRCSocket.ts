@@ -6,6 +6,10 @@ import { MyTokenManager } from './MyTokenManager.js';
 export class TwitchIRCSocket {
 
     //================================//
+    private reconnectInterval: number = 20 * 1000;
+    private isReconnecting: boolean = false;
+
+    //================================//
     protected m_twitchClient: tmi.Client;
     protected m_username: string;
     protected m_channels: string[];
@@ -27,7 +31,9 @@ export class TwitchIRCSocket {
             options: { debug: this.m_debug },
             connection: {
                 reconnect: true,
-                secure: true
+                secure: true,
+                reconnectInterval: this.reconnectInterval,
+                maxReconnectAttempts: 100
             },
             identity: {
                 username: this.m_username,
@@ -69,13 +75,42 @@ export class TwitchIRCSocket {
             channels: this.m_channels
         });
 
+        //this.registerEventListeners();
+
         this.m_twitchClient.connect()
             .then(() => {
                 this.onCorrectConnection();
             })
             .catch((error: any) => {
                 console.error(chalk.red('Error connecting to Twitch: ', error));
+                //this.scheduleReconnect();
             });
+    }
+
+    //================================//
+    private registerEventListeners(): void {
+        this.m_twitchClient.on('disconnected', (reason: string) => {
+            console.error(chalk.red(`Disconnected: ${reason}.`));
+            this.scheduleReconnect();
+        });
+
+        this.m_twitchClient.on('reconnect', () => {
+            console.log(chalk.yellow('Attempting to reconnect now...'));
+        });
+    }
+
+    //================================//
+    private scheduleReconnect(): void {
+        if (this.isReconnecting) return;
+
+        this.isReconnecting = true;
+        console.log(chalk.yellow(`Reconnecting in ${this.reconnectInterval / 1000} seconds...`));
+
+        setTimeout(() => {
+            this.isReconnecting = false;
+            console.log(chalk.blue('Retrying connection...'));
+            this.initializeConnection();
+        }, this.reconnectInterval);
     }
 
     //================================//
